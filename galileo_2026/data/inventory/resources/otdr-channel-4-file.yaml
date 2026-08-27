@@ -1,0 +1,3 @@
+object_type: ExternalResource
+name: OTDR trace of the DAS fiber, Bellcore SOR
+uri: ../fiber/tag=OTDR/channel_4_otdr.sor

@@ -1,0 +1,15 @@
+distance_min,distance_max,coupling_type,medium,attachment
+1076.4,1135.9,outside_borehole_casing,rock,cemented
+1180.5,1239.7,outside_borehole_casing,rock,cemented
+1265.5,1325.0,outside_borehole_casing,rock,cemented
+1364.7,1425.5,outside_borehole_casing,rock,cemented
+1465.7,1522.7,outside_borehole_casing,rock,cemented
+1554.9,1615.1,outside_borehole_casing,rock,cemented
+1645.7,1704.7,outside_borehole_casing,rock,cemented
+1738.7,1795.7,outside_borehole_casing,rock,cemented
+1826.7,1886.7,outside_borehole_casing,rock,cemented
+2170.0,2227.9,outside_borehole_casing,rock,cemented
+2259.7,2318.7,outside_borehole_casing,rock,cemented
+2352.7,2413.1,outside_borehole_casing,rock,cemented
+2439.7,2498.1,outside_borehole_casing,rock,cemented
+2531.6,2588.4,outside_borehole_casing,rock,cemented

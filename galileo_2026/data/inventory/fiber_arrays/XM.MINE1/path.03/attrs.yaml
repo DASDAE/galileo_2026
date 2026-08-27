@@ -1,0 +1,3 @@
+object_type: OpticalPath
+name: Brillouin fiber, site channel 3
+measurements: [otdr-channel-3]

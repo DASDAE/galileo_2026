@@ -1,0 +1,5 @@
+object_type: Interrogator
+name: Brillouin strain interrogator
+manufacturer: Febus Optics
+model: G1
+instrument_type: BOTDR interrogator

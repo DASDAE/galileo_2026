@@ -1,0 +1,61 @@
+name: publish slides
+
+# The slides for the tutorial. They are plain markdown -- no cells are
+# executed -- so this needs quarto and nothing else.
+on:
+  push:
+    branches: [main]
+    paths:
+      # The landing page is built from the readme, so a readme edit has to
+      # trigger a deploy.
+      - readme.md
+      # Published as a resource and linked from the readme.
+      - LICENSING.md
+      - index.qmd
+      - index.scss
+      - intro.qmd
+      - conclusions.qmd
+      - slides.scss
+      - _quarto.yml
+      - geometry-resize.html
+      - slide-logo-link.html
+      - images/**
+      - galileo_2026/images/**
+      - galileo_2026/data/docs/**
+      - .github/workflows/publish.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+
+# Let a run finish rather than cancelling it; never run two deploys at once.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: quarto-dev/quarto-actions/setup@v2
+
+      - run: quarto render
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

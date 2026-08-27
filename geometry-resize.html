@@ -1,0 +1,49 @@
+<!-- Prime the browser cache so the figure is ready the moment the slide is. -->
+<link rel="prefetch" href="galileo_2026/data/docs/geometry.html">
+
+<script>
+  // The borehole figure is a plotly plot inside an iframe. Plotly measures its
+  // legend labels once, when the figure loads, and clips the legend to what it
+  // measured. Reveal keeps every slide that is not on screen at display:none,
+  // where text measures as zero width -- so a figure that loads early comes out
+  // with its legend clipped to the first letter of each label. The measurement
+  // is cached, so asking plotly to resize afterwards does not undo it.
+  //
+  // So hold the iframe's src back until its slide is actually on screen, then
+  // let it load and measure against a real box.
+  (function () {
+    var SELECTOR = "iframe.geometry-frame";
+
+    function load(slide) {
+      if (!slide) return;
+      slide.querySelectorAll(SELECTOR).forEach(function (frame) {
+        var src = frame.getAttribute("data-geometry-src");
+        if (!src || frame.getAttribute("src")) return;
+        // One frame for reveal to finish showing the slide, then load.
+        requestAnimationFrame(function () {
+          setTimeout(function () { frame.setAttribute("src", src); }, 0);
+        });
+      });
+    }
+
+    // A resize or a jump to fullscreen changes the box after the fact; plotly
+    // reflows fine from there, because by then it has a real measurement.
+    function reflow() {
+      document.querySelectorAll(SELECTOR).forEach(function (frame) {
+        var win = frame.contentWindow;
+        if (!win || !win.Plotly) return;
+        var plot = win.document.querySelector(".plotly-graph-div");
+        if (plot) win.Plotly.Plots.resize(plot);
+      });
+    }
+
+    window.addEventListener("load", function () {
+      if (!window.Reveal) return;
+      Reveal.on("ready", function (event) { load(event.currentSlide); });
+      Reveal.on("slidechanged", function (event) { load(event.currentSlide); });
+      Reveal.on("resize", reflow);
+      window.addEventListener("resize", reflow);
+      load(document.querySelector("section.present"));
+    });
+  })();
+</script>

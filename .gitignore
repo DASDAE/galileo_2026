@@ -1,0 +1,99 @@
+# ---------------------------------------------------------------------------
+# Tutorial-specific
+# ---------------------------------------------------------------------------
+
+# Exploratory notebooks. Keep the numbered ones at the repo root tidy.
+scratch/
+
+# Local review notes.
+.scratch/
+
+# Rendered slides. The published copy is built by the publish workflow.
+_site/
+.quarto/
+
+# DASCore index files. These are generated on first use and they embed
+# absolute paths, so they must never be committed.
+.dascore_index.*
+
+# Plots built straight from the operator's survey. These embed the real
+# survey coordinates, which the published inventory deliberately does not
+# carry, so they must not be committed. The tracked galileo_2026/data/docs/geometry.html is
+# rebuilt from galileo_2026/data/inventory's local frame, and is fine.
+galileo_2026/data/*georeferenced*.html
+
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+build/
+dist/
+wheels/
+*.egg-info/
+*.egg
+.installed.cfg
+MANIFEST
+
+# Environments
+.venv/
+venv/
+env/
+ENV/
+
+# Testing and type checking
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.hypothesis/
+
+# ---------------------------------------------------------------------------
+# Jupyter
+# ---------------------------------------------------------------------------
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+profile_default/
+ipython_config.py
+.jupyter/
+
+# ---------------------------------------------------------------------------
+# Editors and IDEs
+# ---------------------------------------------------------------------------
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.spyderproject
+.spyproject
+
+# ---------------------------------------------------------------------------
+# OS
+# ---------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+Desktop.ini
+
+# LibreOffice lock files
+.~lock.*#
+
+# Jupyter scratch notebooks.
+Untitled*.ipynb
+
+/.quarto/
+**/*.quarto_ipynb
+
+# marimo scratch: cell layouts and exported session snapshots.
+__marimo__/

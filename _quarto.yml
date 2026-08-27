@@ -1,0 +1,27 @@
+# Quarto project for the tutorial's slides, published to GitHub Pages.
+# The render list is explicit so the project never picks up the tutorial
+# notebooks: they need the data and a full environment, the slides need
+# neither.
+project:
+  type: default
+  output-dir: _site
+  render:
+    # Generated from readme.md at render time; see index.qmd.
+    - index.qmd
+    - intro.qmd
+    - conclusions.qmd
+  resources:
+    # Embedded in a slide rather than linked: a slide deck served from GitHub
+    # Pages cannot reach the copy that sits next to the notebooks.
+    - galileo_2026/data/docs/geometry.html
+    - galileo_2026/data/docs/optical_topo.pdf
+    # The readme links to this relatively, and a `default` project does not
+    # rewrite .md links to .html, so ship the file itself.
+    - LICENSING.md
+    # Referenced only from the decks' title-slide-attributes, which quarto does
+    # not scan for assets.
+    - images/dascore_logo.png
+    # This figure lives with the notebooks, which need it to travel inside the
+    # package; the slide reaches across to it with a plain <img>, because
+    # quarto rewrites a markdown image path here to one it never copies.
+    - galileo_2026/images/inventory_hierarchy.svg

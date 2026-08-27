@@ -1,0 +1,46 @@
+name: run notebooks
+
+# Every notebook runs end to end as a script, the check AGENTS.md asks for
+# before handing off: `uv run python 01_the_patch.py` executes the cells in
+# dependency order without a browser, so a cell that raises fails the job.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new push to the same branch supersedes the run in progress.
+concurrency:
+  group: notebooks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v10
+        with:
+          # The project floor. molab runs newer, so this is the one place
+          # the floor itself gets exercised.
+          python-version: "3.12"
+          enable-cache: true
+
+      - run: uv sync --locked
+
+      # Notebook 04 needs the pinned DASJax/JAX pair, but the `bonus` extra
+      # brings multi-gigabyte CUDA wheels on Linux x86_64. Install the same
+      # versions without that extra on this CPU runner; `--no-sync` below
+      # keeps uv from removing the overlay.
+      - run: uv pip install "dasjax==0.0.2" "jax==0.11.1"
+
+      - run: |
+          for notebook in 0*_*.py; do
+            echo "::group::$notebook"
+            uv run --no-sync python "$notebook"
+            echo "::endgroup::"
+          done

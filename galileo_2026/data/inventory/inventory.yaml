@@ -1,0 +1,12 @@
+object_type: Inventory
+description: >-
+  Distributed fibre-optic sensing in an underground mine: a strain cable
+  grouted into fourteen boreholes across two drifts and read by a Brillouin
+  interrogator, plus a DAS interrogator on a separate fiber. Coordinates are
+  in an arbitrary local frame.
+coordinate_reference_system:
+  authority: local
+  code: mine-grid
+  name: local mine grid, arbitrary origin
+  coordinate_labels: [x, y, z]
+  units: [meter, meter, meter]

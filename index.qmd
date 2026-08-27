@@ -1,0 +1,25 @@
+---
+# The landing page is generated from readme.md at render time -- this file holds
+# no content of its own, so the readme stays the single source of truth for both
+# GitHub and the published site. Everything below is presentation only.
+#
+# No `title:` here on purpose: the readme opens with its own h1, and setting one
+# would render it twice. `pagetitle` names the browser tab instead.
+pagetitle: "Galileo Conference DASDAE Tutorial"
+description: "Data and code for the DASDAE fiber-optic sensing tutorial at the 14th EGU Galileo Conference."
+format:
+  html:
+    # yeti is what dascore.org renders in, so the landing page and the docs
+    # agree; index.scss layers the logo's palette over it.
+    theme: [yeti, index.scss]
+    toc: true
+    toc-location: right
+    toc-title: "On this page"
+    anchor-sections: true
+    link-external-newwindow: true
+    # The readme's fenced bash/python blocks are the setup instructions.
+    code-copy: true
+    code-overflow: wrap
+---
+
+{{< include readme.md >}}

@@ -1,0 +1,233 @@
+/*-- scss:defaults --*/
+// DASCore's identity is its logo: the Colorado flag, rendered as a C. The three
+// colors below are sampled from docs/_static/logo.png in the dascore repo --
+// they are close to, but not exactly, the official flag colors.
+$dascore-navy: #002868;
+$dascore-crimson: #d0002a;
+$dascore-gold: #ffc934;
+
+// The docs site is stock Quarto yeti, whose $primary is #008cba. Using that blue
+// keeps the deck and dascore.org agreeing on what a link looks like, and keeps
+// links from competing with the crimson used for structure. It is darkened here
+// because #008cba on white is only 3.85:1 -- fine on a monitor, thin on a washed
+// out projector. This is 5.6:1 and still reads as the same blue.
+$dascore-accent: #007095;
+
+$link-color: $dascore-accent;
+$presentation-heading-color: $dascore-navy;
+
+// yeti sets no separate heading face and draws headings light.
+$font-family-sans-serif: "Open Sans", -apple-system, BlinkMacSystemFont,
+  "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+$presentation-font-family: $font-family-sans-serif;
+$presentation-heading-font-weight: 300;
+
+// Reveal's default root is 40px; everything else is sized in em off it.
+$presentation-font-size-root: 53.0px;
+
+// Headings are em off the root, so they would otherwise shrink with the body
+// alone. These are the stock 2.5em/1.6em scaled by 0.8/0.9, which lands the
+// rendered titles 20% down from where they were while the body drops 10%.
+$presentation-h1-font-size: 2.222em;
+$presentation-h2-font-size: 1.422em;
+
+/*-- scss:rules --*/
+// Open Sans is what dascore.org renders in. If the network is down at render or
+// present time this simply falls through to the system sans above, which costs
+// the deck nothing but the exact letterforms.
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&display=swap");
+
+// The flag under every slide title: navy, crimson, gold, in the flag's own
+// order. Drawn as a background gradient rather than a border so the three
+// segments can have different widths.
+.reveal .slide h2 {
+  border-bottom: none;
+  padding-bottom: 0.25em;
+  margin-bottom: 0.6em;
+  background-image: linear-gradient(
+    to right,
+    $dascore-navy 0 45%,
+    $dascore-crimson 45% 80%,
+    $dascore-gold 80% 100%
+  );
+  background-size: 100% 3px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+}
+
+.reveal .slide h3 {
+  color: $dascore-crimson;
+  font-size: 1.1em;
+}
+
+.reveal .slide ul li::marker {
+  color: $dascore-crimson;
+}
+
+// The title slide is painted navy by title-slide-attributes, so every piece of
+// text on it has to be re-lit: the heading color set above is that same navy.
+// Quarto tags this section .quarto-title-block, not #title-slide.
+.reveal .quarto-title-block h1.title,
+.reveal .quarto-title-block .quarto-title-author-name {
+  color: #ffffff;
+}
+
+// The mark is heavy and geometric; Open Sans Light at display size is not, and
+// hairline strokes on a dark ground look fragile. 800 with negative tracking
+// gives the wordmark the same density as the logo.
+.reveal .quarto-title-block h1.title {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.15em;
+}
+
+// The brand colors live here rather than in the letters. Crimson on navy is
+// only 2.47:1 -- a defect in type, irrelevant in a solid bar -- so the rule can
+// use the true logo crimson while the wordmark keeps white at 14:1. It also
+// echoes the tri-color bar under every other slide title.
+.reveal .quarto-title-block h1.title::after {
+  content: "";
+  display: block;
+  width: 300px;
+  height: 8px;
+  margin: 0.32em auto 0;
+  background-image: linear-gradient(
+    to right,
+    #ffffff 0 33%,
+    $dascore-crimson 33% 66%,
+    $dascore-gold 66% 100%
+  );
+}
+
+.reveal .quarto-title-block p.subtitle {
+  color: $dascore-gold;
+  font-weight: 400;
+  font-size: 0.78em;
+}
+
+.reveal .quarto-title-block .quarto-title-affiliation {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.reveal .center-text {
+  text-align: center;
+}
+
+// Echoes the table styling on dascore.org: a navy header band over striped rows.
+.reveal .slide table {
+  font-size: 0.8em;
+}
+
+.reveal .slide table thead th {
+  background-color: $dascore-navy;
+  color: #ffffff;
+  border-color: $dascore-navy;
+}
+
+.reveal .slide table tbody tr:nth-child(odd) {
+  background-color: rgba(210, 209, 209, 0.35);
+}
+
+.reveal .footer a {
+  color: #777777;
+}
+
+// The footer and slide number are single elements shared by every slide, so
+// they cannot be styled per-slide. Reveal flags the deck .has-dark-background
+// while a dark slide is showing, which is exactly the hook needed.
+.reveal.has-dark-background .footer a,
+.reveal.has-dark-background .slide-number a {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+// Quarto parks the logo bottom-right at 2.2rem, where it fights the slide
+// number. Top-right is clear: it sits above the tri-color bar, and slide titles
+// never run that far across. Like the footer it is position:fixed, so it is not
+// scaled by reveal's transform -- same as the deck's other chrome.
+// `img.` for the same reason as the slide-number rule below: footer.css ships
+// `.reveal .slide-logo` and is linked after this theme.
+.reveal img.slide-logo {
+  top: 14px;
+  right: 18px;
+  bottom: auto;
+  max-height: 4.5rem;
+}
+
+// Quarto assumes a bottom-right logo and so lifts the slide number to the top
+// to clear it. The logo is top-right here, so send the number back down where
+// this deck had it.
+// `div.` is load-bearing: quarto-support/footer.css ships the same
+// `.reveal.has-logo .slide-number` selector and is linked after this theme, so
+// an equal-specificity rule here would lose on source order.
+div.reveal.has-logo .slide-number {
+  top: auto;
+  bottom: 10px;
+  right: 10px;
+}
+
+// The title slide is painted #002868, which is exactly the logo's own field --
+// on it the field disappears and only a floating C is left. It is the one dark
+// slide in the deck, so reveal's has-dark-background flag is a precise hook.
+.reveal.has-dark-background img.slide-logo {
+  display: none;
+}
+
+// The borehole geometry is embedded rather than linked: relative links out of
+// a notebook do not resolve on Colab. Sized against the 1280x720 slide canvas
+// so reveal's own scaling handles the rest.
+.reveal .geometry-frame {
+  display: block;
+  width: 100%;
+  height: 425px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  background: #ffffff;
+}
+
+.reveal .smallest {
+  font-size: 0.6em;
+  color: #777777;
+}
+
+// The lede sentence that closes a slide, set off by the logo's gold.
+.reveal .lede {
+  margin-top: 0.7em;
+  border-left: 4px solid $dascore-gold;
+  padding-left: 0.7em;
+}
+
+// A centered lede is a closing line, not a pull-quote; the rule would fight it.
+.reveal .center-text.lede {
+  border-left: none;
+  padding-left: 0;
+}
+
+// The opposite of .tight: squeezes the vertical rhythm where a column has to
+// carry a lead-in, a list and a closing line beside a full-height figure.
+// Reveal's default li margins (~15px top, ~7px bottom) are the bulk of it.
+// Quarto sets `.reveal .slide ul li` at 0.4em/0.2em, so these have to carry the
+// matching `.slide` to win on specificity rather than land silently.
+.reveal .slide .dense p {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+.reveal .slide .dense ul,
+.reveal .slide .dense ol {
+  margin-bottom: 0.3em;
+}
+
+.reveal .slide .dense ul li,
+.reveal .slide .dense ol li {
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+}
+
+// Bullet lists that carry a sentence each; keep them off the footer.
+.reveal .tight ul {
+  margin-top: 0.4em;
+}
+
+.reveal .tight li {
+  margin-bottom: 0.35em;
+}

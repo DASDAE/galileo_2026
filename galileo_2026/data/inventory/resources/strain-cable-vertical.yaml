@@ -1,0 +1,8 @@
+object_type: Cable
+name: strain sensing cable, vertical holes
+fiber_count: 2
+description: >-
+  Purpose-built strain sensing cable carrying one tight-buffered and one
+  loose-buffered fiber. One unspliced run instruments all five vertical
+  holes, looping about a metre from the bottom of each so the fiber goes
+  down and comes back up, taped to the grout tube every few metres.

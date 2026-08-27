@@ -1,0 +1,7 @@
+# The operator's plot moved into the local frame, with the plotly bundle
+# inlined so it works without a network. Treat it as generated: it is not
+# worth diffing and its vendored javascript should not be whitespace-checked.
+galileo_2026/data/docs/geometry.html -diff -whitespace linguist-generated=true
+
+# Instrument files are binary.
+*.sor binary

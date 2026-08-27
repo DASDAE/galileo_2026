@@ -1,0 +1,21 @@
+object_type: Acquisition
+description: >-
+  The continuously written low frequency product, decimated from the same
+  interrogator and fiber as the full rate acquisition. This produced the
+  DAS_LF data.
+data_category: DAS
+data_type: phase
+data_units: rad
+interrogator: das-interrogator
+gauge_length: 1.5952380895614624
+spatial_interval: 1.5952380895614624
+sample_rate: 5.0
+time_min: 2026-07-30T07:16:02
+time_max: 2026-08-06T11:08:07
+distance_map:
+  # Slope is exactly 1: this interrogator and the path share a group index.
+  # The map starts at the splice box, 11.3 m of patch cable along the DAS's
+  # own axis, so the channels on that lead are placed nowhere. See README.md
+  # for where the indices come from.
+  instrument_distance: [11.3, 1676.595232129097]
+  distance: [965.0, 2630.295232]

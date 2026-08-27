@@ -1,0 +1,19 @@
+<!-- Quarto's revealjs `logo:` renders a bare <img class="slide-logo"> with no
+option to point it anywhere, so wrap it in a link once the deck is up. It goes
+to the repository rather than dascore.org because the docs site is built from
+the last release, while this tutorial runs against the dev branch. The img
+keeps its class, so the theme's positioning still applies, and the title slide
+-- which hides the logo -- is left with an empty anchor. -->
+
+<script>
+  window.addEventListener("load", function () {
+    var logo = document.querySelector("img.slide-logo");
+    if (!logo || logo.parentElement.tagName === "A") return;
+    var link = document.createElement("a");
+    link.href = "https://github.com/DASDAE/dascore";
+    link.target = "_blank";
+    link.rel = "noopener";
+    logo.parentElement.insertBefore(link, logo);
+    link.appendChild(logo);
+  });
+</script>

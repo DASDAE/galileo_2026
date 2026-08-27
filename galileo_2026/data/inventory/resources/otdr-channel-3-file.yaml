@@ -1,0 +1,3 @@
+object_type: ExternalResource
+name: OTDR trace of the Brillouin fiber, Bellcore SOR
+uri: ../fiber/tag=OTDR/channel_3_otdr.sor

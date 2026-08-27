@@ -1,0 +1,71 @@
+---
+title: "DASCore"
+# The deck is titled for its subject, but the browser tab is titled for the
+# session it belongs to -- attendees have both decks and the notebooks open.
+pagetitle: "Galileo Tutorial"
+subtitle: "Tutorial conclusions"
+format:
+  revealjs:
+    theme: [default, slides.scss]
+    slide-number: true
+    hash-type: number
+    controls: true
+    center-title-slide: true
+    width: 1280
+    height: 720
+    footer: "[github.com/DASDAE/galileo_2026](https://github.com/DASDAE/galileo_2026)"
+    include-after-body:
+      - geometry-resize.html
+      - slide-logo-link.html
+    include-in-header:
+      - text: |
+          <link rel="icon" href="images/dascore_logo.png">
+    # The mark rides on the content slides, not the title slide: its own field is
+    # this same navy, so on a navy background the field vanishes and only a
+    # floating C is left. On white it reads as the whole logo.
+    logo: images/dascore_logo.png
+    title-slide-attributes:
+      data-background-color: "#002868"
+---
+
+
+## DASDAE {.smaller}
+
+:::{.fragment}
+DASCore is one part of the growing DAS Data Analysis Ecosystem, [DASDAE](https://github.com/DASDAE). Other projects include:
+:::
+
+:::{.tight}
+:::{.incremental}
+- [das-anomaly](https://github.com/DASDAE/das-anomaly): anomaly detection with auto-encoders
+- [DerZug](https://github.com/DASDAE/derzug): interactive processing and visualizations
+- [DASJax](https://github.com/DASDAE/dasjax): DASCore kernels compiled for CPU and GPU (notebook 04)
+- [unidas](https://github.com/DASDAE/unidas): move data between DASCore, DASPy, Lightguide and Xdas
+:::
+:::
+
+
+
+## More talks this week {.smaller}
+
+:::{.tight}
+- [**The Open-Source DAS Python Ecosystem**](https://meetingorganizer.copernicus.org/GC14-FibreOptic/GC14-FibreOptic-9.html) — Derrick Chambers
+  <br>Session 1 · Tuesday 1 Sep, 11:00 · Lecture room
+
+<br>
+
+- [**DFOS based fault creep monitoring — insights from an underground mine experiment**](https://meetingorganizer.copernicus.org/GC14-FibreOptic/GC14-FibreOptic-46.html) — Jannes-Lennart Kinscher
+  <br>Session 3 · Wednesday 2 Sep, 11:20 · Lecture room — where this tutorial's data comes from
+:::
+
+## Call to arms {.smaller}
+
+:::{.tight}
+:::{.incremental}
+- Give [DASCore](https://github.com/DASDAE/dascore) and [Xdas](https://github.com/xdas-dev/xdas) a star — it helps justify working on them
+- If you like DASCore, please help us test the [`dev` branch](https://github.com/DASDAE/dascore/tree/dev) ahead of the 1.0 release
+  - Feedback on the API and the `Inventory` would be especially useful
+- If you are building DFOS tools, check out [extending DASCore](https://dascore.org/contributing/extending_dascore.html)
+- Build, and share, something cool
+:::
+:::

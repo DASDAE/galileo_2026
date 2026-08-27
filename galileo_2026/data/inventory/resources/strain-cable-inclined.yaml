@@ -1,0 +1,7 @@
+object_type: Cable
+name: strain sensing cable, inclined holes
+fiber_count: 4
+description: >-
+  Strain sensing cable carrying four tight-buffered single-mode fibers,
+  ordered in segments cut to length, with a resin-filled splice enclosure
+  at each end. Pre-tensioned rather than taped along its length.

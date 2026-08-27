@@ -1,0 +1,10 @@
+object_type: OpticalPath
+name: DAS fiber, site channel 4
+description: >-
+  The second fiber, following exactly the same route through the same
+  sensing cables, read by the DAS interrogator. That interrogator is
+  connected at the main splice box rather than in the instrument room, so
+  its distances start there: the telemetry ahead of the box is fiber it
+  never sees, while the last stretch of telemetry, from the box out to the
+  sensing cable, is on its path.
+measurements: [otdr-channel-4]

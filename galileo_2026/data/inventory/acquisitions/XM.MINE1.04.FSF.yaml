@@ -1,0 +1,20 @@
+object_type: Acquisition
+description: >-
+  Full rate DAS, written continuously. It produced blast.h5, an excerpt
+  around a blast.
+data_category: DAS
+data_type: phase
+data_units: rad
+interrogator: das-interrogator
+gauge_length: 1.5952380895614624
+spatial_interval: 1.5952380895614624
+sample_rate: 2000.0
+time_min: 2026-07-30T07:17:05
+time_max: 2026-08-06T11:08:05
+distance_map:
+  # Slope is exactly 1: this interrogator and the path share a group index.
+  # The map starts at the splice box, 11.3 m of patch cable along the DAS's
+  # own axis, so the channels on that lead are placed nowhere. See README.md
+  # for where the indices come from.
+  instrument_distance: [11.3, 1676.595232129097]
+  distance: [965.0, 2630.295232]

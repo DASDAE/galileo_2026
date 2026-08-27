@@ -1,0 +1,8 @@
+object_type: Cable
+name: telemetry cable
+description: >-
+  The non-sensing run from the instrument room out to the vertical
+  sensing cable, through conduit and a tunnel. It passes through the main
+  splice box in the gallery, where the DAS interrogator is connected, and
+  carries on about 99 m beyond it to reach the sensing fiber. Its route is
+  not surveyed here; what matters is its optical continuity and loss.

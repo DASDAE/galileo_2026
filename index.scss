@@ -1,0 +1,81 @@
+/*-- scss:defaults --*/
+// Same palette as slides.scss, sampled from the DASCore logo: the Colorado
+// flag, rendered as a C. Kept in step with the decks by hand -- these are the
+// only three values that need to match.
+$dascore-navy: #002868;
+$dascore-crimson: #d0002a;
+$dascore-gold: #ffc934;
+
+// yeti's own $primary is #008cba; this is the same blue darkened to clear 4.5:1
+// on white, matching the link colour the decks use.
+$link-color: #007095;
+
+$headings-color: $dascore-navy;
+$headings-font-weight: 300;
+
+/*-- scss:rules --*/
+// The readme uses h1 for each top-level section, so the tri-color rule lands on
+// every section heading -- the same bar that sits under every slide title.
+h1 {
+  padding-bottom: 0.3rem;
+  background-image: linear-gradient(
+    to right,
+    $dascore-navy 0 45%,
+    $dascore-crimson 45% 80%,
+    $dascore-gold 80% 100%
+  );
+  background-size: 100% 3px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+}
+
+// The readme's opening h1 is the page title; give it more room than the section
+// headings that follow. Pandoc wraps every heading in its own <section>, so a
+// bare `h1:first-of-type` matches all of them -- the first section has to be
+// named explicitly.
+#quarto-document-content > section:first-of-type > h1 {
+  margin-bottom: 1.2rem;
+}
+
+// Quarto renders the sidebar TOC heading as an h2 too, so exclude it -- this is
+// meant for the readme's own `##` subheadings.
+h2:not(#toc-title) {
+  color: $dascore-crimson;
+}
+
+// Echoes dascore.org's table styling: a navy header band over striped rows.
+// This is the Contents table of notebooks, so it carries the molab badges.
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+thead th {
+  background-color: $dascore-navy;
+  color: #ffffff;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+tbody td {
+  border: 1px solid #dee2e6;
+  padding: 0.5rem 0.75rem;
+  vertical-align: middle;
+}
+
+tbody tr:nth-child(odd) {
+  background-color: rgba(210, 209, 209, 0.35);
+}
+
+// The molab badges sit in the last column; keep them from being stretched by
+// the theme's img rules.
+td img {
+  max-width: none;
+  vertical-align: middle;
+}
+
+// Wide content scrolls inside its own box rather than the page.
+.table-responsive,
+pre {
+  overflow-x: auto;
+}

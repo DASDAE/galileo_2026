@@ -1,0 +1,18 @@
+object_type: Acquisition
+description: Brillouin strain monitoring. This produced the BOTDR data.
+data_category: DSS
+data_type: strain
+data_units: microstrain
+interrogator: botdr-interrogator
+gauge_length: 1.0
+spatial_interval: 0.1
+time_min: 2026-07-08T18:50:07
+distance_map:
+  # Slope is the ratio between this interrogator's assumed group index and
+  # the path's; offset is fitted against the cable junctions and the fiber
+  # end as the OTDR trace reported it. The record then runs 12 m past that
+  # end, which is where the path now ends; the junctions hold. See "Both
+  # paths are stated in optical distance" in README.md, which is the one
+  # place the two indices and their source are stated.
+  instrument_distance: [850.0, 2750.0]
+  distance: [823.14, 2762.79]
