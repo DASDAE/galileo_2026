@@ -58,7 +58,7 @@ DASCore is one part of the growing DAS Data Analysis Ecosystem, [DASDAE](https:/
   <br>Session 3 · Wednesday 2 Sep, 11:20 · Lecture room — where this tutorial's data comes from
 :::
 
-## Call to arms {.smaller}
+## Call to action {.smaller}
 
 :::{.tight}
 :::{.incremental}
