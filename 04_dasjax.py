@@ -7,10 +7,14 @@
 #     "matplotlib>=3.10",
 #     "numba",
 #     "dasjax==0.0.2",
-#     # JAX's default wheel is CPU only. This adds its bundled CUDA runtime on
-#     # molab's Linux x86_64 platform, even before a GPU is attached.
-#     "jax[cuda12]; sys_platform == 'linux' and platform_machine == 'x86_64'",
+#     # JAX's default wheel is CPU only. The last line adds its bundled CUDA
+#     # runtime on molab's Linux x86_64 platform, even before a GPU is
+#     # attached. jaxlib and jax-cuda12-plugin must report the exact same
+#     # version or the plugin is skipped, so the CUDA requirement carries the
+#     # pin itself rather than inheriting it from the plain one.
 #     "jax==0.11.1",
+#     "jaxlib==0.11.1",
+#     "jax[cuda12]==0.11.1; sys_platform == 'linux' and platform_machine == 'x86_64'",
 # ]
 # ///
 
@@ -121,7 +125,7 @@ def _(band, blast_patch, dasjax):
         print(f"GPU unavailable: {_error}")
 
     print("available backends:", ", ".join(kernels))
-    return kernels, pipeline
+    return (kernels,)
 
 
 @app.cell
@@ -266,17 +270,141 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ### Exercise
+    ## A fusion-friendly event display
 
-    Print `dasjax.list_operations()`, add `.abs()` to both processing chains, then rerun the sweep. Does the fused extra operation change the timing?
+    The recursive filter above limits parallelism. This alternative detrends, normalizes, rectifies, noise-gates, clips, and rescales the signal for display. After L2 normalization, channel RMS is `1 / sqrt(N)`; the gate maps amplitudes from 0.2 to 5 times RMS onto 0 to 1. All six shape-preserving steps enter one JIT segment, where XLA can fuse compatible work.
+
+    Of course, this example is a bit contrived, but demonstrates the potential of the method.
+    """)
+    return
+
+
+@app.cell
+def _(blast_patch, dasjax, kernels, np):
+    # Cast once so NumPy keeps the float32 Patch dtype during scalar arithmetic.
+    _rms = float(1.0 / np.sqrt(blast_patch.shape[0]))
+    _noise_floor = 0.2 * _rms
+    _ceiling = 5.0 * _rms
+    _display_range = _ceiling - _noise_floor
+
+    def dascore_prepare(patch):
+        """Detrend and normalize eagerly."""
+        return patch.detrend("time", type="linear").normalize(
+            "time", norm="l2"
+        )
+
+    # Four more eager operations, each materializing a full-sized Patch.
+    def dascore_display(patch):
+        out = dascore_prepare(patch).abs() - _noise_floor
+        # Patch has no clip method, so update it with the clipped array.
+        out = out.update(data=np.clip(out.data, 0.0, _display_range))
+        return out / _display_range
+
+    _prepare_pipeline = (
+        dasjax.JaxPatchPipeline()
+        .detrend(dim="time", type="linear")
+        .normalize(dim="time", norm="l2")
+    )
+    _display_pipeline = (
+        _prepare_pipeline.abs()
+        .add(-_noise_floor)
+        .clip(0.0, _display_range)
+        .scale(1.0 / _display_range)
+    )
+    _display_pipeline.assert_no_fallback(blast_patch)
+    prepare_kernels = {
+        _name: _prepare_pipeline.compile(backend=_name) for _name in kernels
+    }
+    display_kernels = {
+        _name: _display_pipeline.compile(backend=_name) for _name in kernels
+    }
+    return dascore_display, dascore_prepare, display_kernels, prepare_kernels
+
+
+@app.cell
+def _(
+    bench,
+    blast_patch,
+    dascore_display,
+    dascore_prepare,
+    display_kernels,
+    np,
+    pd,
+    prepare_kernels,
+    repeat_channels,
+):
+    _reference = dascore_display(blast_patch)
+    _scale = np.abs(_reference.data).max()
+    assert np.isfinite(_reference.data).all() and _scale > 0
+    _results = {
+        _name: blast_patch.pipe(_kernel)
+        for _name, _kernel in display_kernels.items()
+    }
+    for _result in _results.values():
+        assert np.isfinite(_result.data).all()
+        assert (
+            _result.data.dtype
+            == _reference.data.dtype
+            == blast_patch.data.dtype
+        )
+        np.testing.assert_allclose(
+            _result.data, _reference.data, rtol=0, atol=1e-4 * _scale
+        )
+
+    # Reuse the widest patch so the GPU has enough parallel work.
+    _wide_patch = repeat_channels(blast_patch, 16)
+    _rows = {
+        "DASCore": {
+            "prepare_ms": bench(dascore_prepare, _wide_patch) * 1_000,
+            "display_ms": bench(dascore_display, _wide_patch) * 1_000,
+        }
+    }
+    for _name in display_kernels:
+        _rows[f"DASJax ({_name.upper()})"] = {
+            "prepare_ms": bench(prepare_kernels[_name], _wide_patch) * 1_000,
+            "display_ms": bench(display_kernels[_name], _wide_patch) * 1_000,
+        }
+
+    fusion_timings = pd.DataFrame.from_dict(_rows, orient="index")
+    fusion_timings["extra_ops_ms"] = (
+        fusion_timings["display_ms"] - fusion_timings["prepare_ms"]
+    )
+    fusion_timings["display_speedup"] = (
+        fusion_timings.loc["DASCore", "display_ms"]
+        / fusion_timings["display_ms"]
+    )
+    fusion_timings = fusion_timings.round(2)
+    fusion_timings.index.name = "implementation"
+    _backend = "gpu" if "gpu" in _results else "cpu"
+    displayed = _results[_backend]
+    fusion_timings
+    return (displayed,)
+
+
+@app.cell
+def _(blast_window, displayed):
+    _ax = displayed.select(time=blast_window).viz.waterfall(
+        scale=1, cmap="magma"
+    )
+    _ax.set_title("Noise-gated event amplitude (0-1)")
+    _ax
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    The overall speedup includes compiled detrending and normalization; `extra_ops_ms` estimates the marginal cost of the four display operations, and values near or below zero are timing noise. DASCore materializes each result, while DASJax can fuse compatible work into the existing program. Both paths preserve the input dtype, so lower precision explains none of the difference.
+
+    ### **Exercise (4.1)**
+
+    Print `dasjax.list_operations()`, then add `.abs()` to both `dascore_chain` and `pipeline` in the first example. Does the fused extra operation change the timing?
 
     ## Key Points
 
-    - `JaxPatchPipeline` records supported operations; `compile()` returns a reusable `Patch -> Patch` callable for each backend.
+    - `compile()` returns a reusable `Patch -> Patch` callable; compatible shape-preserving operations share JIT segments that XLA can fuse.
     - The first call for each shape and dtype compiles; warm it up before timing.
     - Check numerical agreement, then measure end to end—the CPU/GPU crossover belongs to the pipeline, data, and machine.
-
-    The [conclusion slides](https://dasdae.github.io/galileo_2026/conclusions.html) show where DASCore goes next and how to help.
     """)
     return
 

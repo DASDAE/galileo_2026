@@ -23,10 +23,14 @@ dependencies = [
 # Bonus material; not needed for notebooks 01-03.
 bonus = [
     "dasjax==0.0.2",
-    # The plain pin supplies CPU JAX everywhere. Linux x86_64 also receives
-    # the bundled CUDA runtime -- a few gigabytes, even on a CPU-only machine.
-    "jax[cuda12]; sys_platform == 'linux' and platform_machine == 'x86_64'",
+    # The plain pins supply CPU JAX everywhere. Linux x86_64 also receives the
+    # bundled CUDA runtime -- a few gigabytes, even on a CPU-only machine.
+    # jaxlib and jax-cuda12-plugin must report the exact same version or the
+    # plugin is skipped, so the CUDA requirement carries the pin itself rather
+    # than inheriting it from the line below.
     "jax==0.11.1",
+    "jaxlib==0.11.1",
+    "jax[cuda12]==0.11.1; sys_platform == 'linux' and platform_machine == 'x86_64'",
 ]
 
 [build-system]

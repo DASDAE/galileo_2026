@@ -491,6 +491,7 @@ bonus = [
     { name = "dasjax" },
     { name = "jax" },
     { name = "jax", extra = ["cuda12"], marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "jaxlib" },
 ]
 
 [package.dev-dependencies]
@@ -503,7 +504,8 @@ requires-dist = [
     { name = "dascore", git = "https://github.com/DASDAE/dascore?rev=dev" },
     { name = "dasjax", marker = "extra == 'bonus'", specifier = "==0.0.2" },
     { name = "jax", marker = "extra == 'bonus'", specifier = "==0.11.1" },
-    { name = "jax", extras = ["cuda12"], marker = "platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'bonus'" },
+    { name = "jax", extras = ["cuda12"], marker = "platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'bonus'", specifier = "==0.11.1" },
+    { name = "jaxlib", marker = "extra == 'bonus'", specifier = "==0.11.1" },
     { name = "marimo", specifier = ">=0.24" },
     { name = "matplotlib", specifier = ">=3.10" },
     { name = "numba" },

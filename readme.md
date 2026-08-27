@@ -17,6 +17,8 @@ Data and code for the [Galileo 2026](https://www.egu-galileo.eu/gc14-fibreoptic/
 
 # Contents
 
+We will primarily cover 3-4 notebooks:
+
 | Notebook | Topic | molab |
 | --- | --- | --- |
 | `00_setup.py` | Check your environment and data | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/00_setup.py) |
@@ -27,23 +29,25 @@ Data and code for the [Galileo 2026](https://www.egu-galileo.eu/gc14-fibreoptic/
 
 The same three notebooks with every exercise worked are in [`solutions/`](solutions/); open them the same way.
 
-And, just for fun, I asked Claude Code (running Fable 5) and Codex (running GPT 5.6 Sol Ultra) to do some independent research, and return something interesting. These are pure-AI generated notebooks which we will examine, time permitting, and evaluate the model's reasoning and code quality. Their contents are as follows:
+## Novel or Nonsense?
+
+To practice separating insight from slop in AI-generated research, I asked Claude Code with Fable 5 and Codex with GPT-5.6 Sol Ultra to investigate the dataset. Time permitting, we'll assess the reasoning and code in their six notebooks.
 
 ## Claude Code
 
 | Notebook | Topic | molab |
 | --- | --- | --- |
-| [`01_the_step_response.py`](claude_research/01_the_step_response.py) | The offset the blast leaves in the DAS phase decays as the step response of the interrogator's own first-order high-pass, established by five checks, the last of which undoes the filter. | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/claude_research/01_the_step_response.py) |
-| [`02_the_clock_in_the_files.py`](claude_research/02_the_clock_in_the_files.py) | The gaps `get_gaps` reports in the 5 Hz files are a drifting sample count rather than missing data, so times inside a file are good to about a second. | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/claude_research/02_the_clock_in_the_files.py) |
-| [`03_the_brillouin_record.py`](claude_research/03_the_brillouin_record.py) | No borehole moved above the BOTDR's noise floor, and the wild sweeps that forced a robust statistic turn out to locate four cable junctions. | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/claude_research/03_the_brillouin_record.py) |
+| [`01_the_step_response.py`](claude_research/01_the_step_response.py) | A blast-induced phase offset follows the interrogator's first-order high-pass step response. | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/claude_research/01_the_step_response.py) |
+| [`02_the_clock_in_the_files.py`](claude_research/02_the_clock_in_the_files.py) | Reported 5 Hz gaps reflect a drifting sample count, not missing data; within-file times are accurate to about one second. | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/claude_research/02_the_clock_in_the_files.py) |
+| [`03_the_brillouin_record.py`](claude_research/03_the_brillouin_record.py) | BOTDR detects no borehole motion above noise, while robust statistics reveal four cable junctions. | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/claude_research/03_the_brillouin_record.py) |
 
 ## Codex
 
 | Notebook | Topic | molab |
 | --- | --- | --- |
-| [`01_blast_moveout.py`](codex_research/01_blast_moveout.py) | A robust plane fit to the first blast arrival across the five north holes gives projected velocities along the drift and down the holes, with the paired fiber legs as its check. | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/codex_research/01_blast_moveout.py) |
-| [`02_transient_or_permanent.py`](codex_research/02_transient_or_permanent.py) | The apparent step at the bottom of N180 decays within a minute on both co-located fiber legs, and the Brillouin record resolves no step that persists, so it is transient in the recorded DAS. | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/codex_research/02_transient_or_permanent.py) |
-| [`03_coupling_or_optics.py`](codex_research/03_coupling_or_optics.py) | The inventory's cemented intervals are several times quieter than nearby unlabelled cable -- a registration feature rather than an independent coupling test -- and no monotonic association is detected between the uncoupled cable's variability and the cumulative listed connector and splice loss. | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/codex_research/03_coupling_or_optics.py) |
+| [`01_blast_moveout.py`](codex_research/01_blast_moveout.py) | A robust plane fit estimates blast velocities along the drift and boreholes, checked against paired fiber legs. | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/codex_research/01_blast_moveout.py) |
+| [`02_transient_or_permanent.py`](codex_research/02_transient_or_permanent.py) | The N180 step decays within a minute on both fiber legs, with no persistent Brillouin signal. | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/codex_research/02_transient_or_permanent.py) |
+| [`03_coupling_or_optics.py`](codex_research/03_coupling_or_optics.py) | Cemented intervals are quieter -- a registration feature, not a coupling test -- and uncoupled variability does not track cumulative connector and splice loss. | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/codex_research/03_coupling_or_optics.py) |
 
 # Background
 
@@ -117,4 +121,4 @@ Code is MIT, data is CC BY 4.0. See [LICENSING.md](LICENSING.md).
 
 # AI usage
 
-Claude Code and Codex were used in preparing and editing this material.
+Claude Code and Codex were used to help prepare and edit this material.
