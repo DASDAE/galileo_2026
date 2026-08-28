@@ -45,17 +45,17 @@ DASCore is one part of the growing DAS Data Analysis Ecosystem, [DASDAE](https:/
 :::
 
 
-
 ## More talks this week {.smaller}
 
-:::{.tight}
-- [**The Open-Source DAS Python Ecosystem**](https://meetingorganizer.copernicus.org/GC14-FibreOptic/GC14-FibreOptic-9.html) — Derrick Chambers
-  <br>Session 1 · Tuesday 1 Sep, 11:00 · Lecture room
-
-<br>
-
-- [**DFOS based fault creep monitoring — insights from an underground mine experiment**](https://meetingorganizer.copernicus.org/GC14-FibreOptic/GC14-FibreOptic-46.html) — Jannes-Lennart Kinscher
-  <br>Session 3 · Wednesday 2 Sep, 11:20 · Lecture room — where this tutorial's data comes from
+:::{.program-talks}
+| Talk | Session and time |
+| --- | --- |
+| [**The Open-Source DAS Python Ecosystem**](https://meetingorganizer.copernicus.org/GC14-FibreOptic/GC14-FibreOptic-9.html)<br>Derrick Chambers | Session 1<br>Tue 1 Sep, 11:00 |
+| [**GAIA Data Platform**](https://meetingorganizer.copernicus.org/GC14-FibreOptic/GC14-FibreOptic-69.html) — DAS data discovery and processing<br>Margaux Mouchené et al. | Session 1<br>Tue 1 Sep, 11:10 |
+| [**Modular real-time streaming architecture**](https://meetingorganizer.copernicus.org/GC14-FibreOptic/GC14-FibreOptic-54.html) — high-throughput DAS monitoring<br>Hristo V. Valev et al. | Session 2<br>Tue 1 Sep, 16:50 |
+| [**FoBench**](https://meetingorganizer.copernicus.org/GC14-FibreOptic/GC14-FibreOptic-48.html) — Python toolbox for FOS processing and data handling<br>Sergio Diaz-Meza et al. | Poster P1<br>Tue 1 Sep, 18:00 |
+| [**DFOS based fault creep monitoring**](https://meetingorganizer.copernicus.org/GC14-FibreOptic/GC14-FibreOptic-46.html) — where this tutorial's data comes from<br>Jannes-Lennart Kinscher et al. | Session 3<br>Wed 2 Sep, 11:20 |
+| [**GEOPSY-DAS**](https://meetingorganizer.copernicus.org/GC14-FibreOptic/GC14-FibreOptic-22.html) — interactive DAS visualization and processing<br>Luc Moutote et al. | Session 5<br>Thu 3 Sep, 09:50 |
 :::
 
 ## Call to action {.smaller}

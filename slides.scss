@@ -128,6 +128,17 @@ $presentation-h2-font-size: 1.422em;
   background-color: rgba(210, 209, 209, 0.35);
 }
 
+// Six programme entries share one conclusions slide; keep the table legible
+// while leaving enough clearance for the title and footer.
+.reveal .slide .program-talks table {
+  font-size: 0.6em;
+}
+
+.reveal .slide .program-talks th,
+.reveal .slide .program-talks td {
+  padding: 0.1em 0.35em;
+}
+
 .reveal .footer a {
   color: #777777;
 }

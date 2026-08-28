@@ -106,7 +106,6 @@ def _(mo):
 def _():
     import dascore as dc
     import numpy as np
-    import pandas as pd
 
     from galileo_2026 import get_data_path, get_image_path, get_inventory_path
 
@@ -300,7 +299,7 @@ def _(enriched):
         _distance = _patch.get_coord("distance")
         _dmin, _dmax = _distance.min(), _distance.max()
 
-        print(f"{_tag:<7} N180 spans {_dmin:.1f} to {_dmax.max():.1f} m")
+        print(f"{_tag:<7} N180 spans {_dmin:.1f} to {_dmax:.1f} m")
     return
 
 
@@ -336,7 +335,7 @@ def _(enriched, np):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ### **Exercise (3.2)**
+    ### **Exercise (3.1)**
 
     Take the low-frequency DAS data, keep only the downgoing leg of each borehole in the south drift, and work out how many channels that leaves. Then compare the mean strain in the top 5 m of the holes against the bottom 5 m — `hole_depth` is the coordinate you want.
     """)

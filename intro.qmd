@@ -122,10 +122,20 @@ Attaches to a spool for expressive querying and patch enrichment
 2. **Manage an archive with `Spool`**: subselect regions of interest, chunk, merge, reshape and visualize contents (notebook 02)
 
 3. **Track a deployment with `Inventory`**: attach metadata and enrich selection and patches (notebook 03)
+:::
+:::
 
-4. **Bonus**: create high-performance CPU/GPU kernels with DASJax (notebook 04)
+
+## Bonus (time permitting) {.smaller}
+
+:::{.tight}
+:::{.incremental}
+1. **The Need for Speed**: A demonstration of using [JAX](https://github.com/jax-ml/jax) to speed up DASCore.
+
+2. **Novel or Nonsense**: Evaluating research created by ChatGPT Sol and Claude Fable 5.
 :::
 :::
+
 
 ## The dataset {.smaller}
 

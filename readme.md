@@ -17,7 +17,7 @@ Data and code for the [Galileo 2026](https://www.egu-galileo.eu/gc14-fibreoptic/
 
 # Contents
 
-We will primarily cover 3-4 notebooks:
+We will primarily cover 3 notebooks that explain DASCore using a real research dataset.
 
 | Notebook | Topic | molab |
 | --- | --- | --- |
@@ -25,15 +25,24 @@ We will primarily cover 3-4 notebooks:
 | `01_the_patch.py` | The `Patch`: filtering, transforms and plots | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/01_the_patch.py) |
 | `02_the_spool.py` | The `Spool`: an archive, selected and re-cut | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/02_the_spool.py) |
 | `03_the_inventory.py` | The observing system, with `Inventory` | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/03_the_inventory.py) |
-| `04_dasjax.py` | *(bonus)* Compiled kernels with DASJax | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/04_dasjax.py) |
+
 
 The same three notebooks with every exercise worked are in [`solutions/`](solutions/); open them the same way.
 
-## Novel or Nonsense?
+
+### **Bonus**: The Need for Speed
+
+This notebook demonstrates DASJax, a proof-of-concept notebook for using [Jax](https://github.com/jax-ml/jax) to accelerate DASCore.
+
+| Notebook | Topic | molab |
+| --- | --- | --- |
+| `04_dasjax.py` | Compiled kernels with DASJax | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/04_dasjax.py) |
+
+### **Bonus**: Novel or Nonsense?
 
 To practice separating insight from slop in AI-generated research, I asked Claude Code with Fable 5 and Codex with GPT-5.6 Sol Ultra to investigate the dataset. Time permitting, we'll assess the reasoning and code in their six notebooks.
 
-## Claude Code
+#### Claude Code
 
 | Notebook | Topic | molab |
 | --- | --- | --- |
@@ -41,7 +50,7 @@ To practice separating insight from slop in AI-generated research, I asked Claud
 | [`02_the_clock_in_the_files.py`](claude_research/02_the_clock_in_the_files.py) | Reported 5 Hz gaps reflect a drifting sample count, not missing data; within-file times are accurate to about one second. | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/claude_research/02_the_clock_in_the_files.py) |
 | [`03_the_brillouin_record.py`](claude_research/03_the_brillouin_record.py) | BOTDR detects no borehole motion above noise, while robust statistics reveal four cable junctions. | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/claude_research/03_the_brillouin_record.py) |
 
-## Codex
+#### Codex
 
 | Notebook | Topic | molab |
 | --- | --- | --- |

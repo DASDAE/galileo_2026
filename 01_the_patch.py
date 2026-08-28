@@ -135,13 +135,13 @@ def _(mo):
 
 @app.cell
 def _(patch):
-    patch.dims  # dimension names
+    print("dimensions:", patch.dims)
+    print("coordinates:", patch.coords)
+    print("metadata:", patch.attrs)
 
-    patch.coords  # coordinates (dimension labels + associated coordinates)
-
-    patch.data  # array
-
-    patch.attrs  # metadata
+    # Leave a small slice as the final expression so marimo renders the array
+    # without trying to display the entire recording.
+    patch.data[:, :5]
     return
 
 
@@ -217,11 +217,9 @@ def _(mo):
 
 @app.cell
 def _(n180_patch):
-
-    middle_ind = len(n180_patch.get_coord("distance")) // 2
-
-    middle = n180_patch.select(distance=middle_ind, samples=True)
-    middle.viz.wiggle()
+    _middle_ind = len(n180_patch.get_coord("distance")) // 2
+    _middle = n180_patch.select(distance=_middle_ind, samples=True)
+    _middle.viz.wiggle()
     return
 
 
@@ -261,16 +259,16 @@ def _(mo):
 @app.cell
 def _(blast_time_zoom_0, borehole_distances, patch, plt):
     # Select the borehole and the window around the blast.
-    n180_blast = patch.select(
+    _n180_blast = patch.select(
         distance=borehole_distances["N180"], time=blast_time_zoom_0
     )
 
     # Apply the pass filter.
-    n180_blast_filtered = n180_blast.pass_filter(time=(5, 200))
+    n180_blast_filtered = _n180_blast.pass_filter(time=(5, 200))
 
     # Setup and display both wiggle plots side by side.
     _fig, _axes = plt.subplots(1, 2, figsize=(12, 6))
-    n180_blast.viz.wiggle(ax=_axes[0], scale=0.5)
+    _n180_blast.viz.wiggle(ax=_axes[0], scale=0.5)
     n180_blast_filtered.viz.wiggle(ax=_axes[1], scale=0.5)
     _axes[0].set_title("unfiltered")
     _axes[1].set_title("5 to 200 Hz")
@@ -381,12 +379,12 @@ def _(blast_time_zoom_0, dc, plt, processed):
     )
 
     peak_times = _time[_peaks]
-    peak_values = _envelope.data[_peaks]
+    _peak_values = _envelope.data[_peaks]
 
     # plot the results
     _fig, _ax = plt.subplots(figsize=(10, 4))
     _ax.plot(_time, _envelope.data)
-    _ax.plot(peak_times, peak_values, "rv")
+    _ax.plot(peak_times, _peak_values, "rv")
     _ax.set_xlabel("seconds from window start")
     _ax.set_ylabel("mean envelope of strain rate")
     _ax.set_title(f"{len(_peaks)} peaks")
@@ -417,8 +415,9 @@ def _(blast_time_zoom_0, processed):
         .squeeze()
     )
 
-    # plot, then set axis to log
-    _ax = n180_spectrum.viz.wiggle()
+    # A log axis cannot show the zero-frequency bin, so skip it explicitly.
+    _nonzero = n180_spectrum.select(ft_time=(1, ...), samples=True)
+    _ax = _nonzero.viz.wiggle()
     _ax.set_xscale("log")
     _ax.set_yscale("log")
     _ax
@@ -435,9 +434,8 @@ def _(mo):
 
 @app.cell
 def _(n180_spectrum):
-    _ax = n180_spectrum.viz.wiggle()
-    _ax.set_xlim(100, 300)
-    _ax
+    # Select before plotting so the vertical scale fits this band too.
+    n180_spectrum.select(ft_time=(100, 300)).viz.wiggle()
     return
 
 

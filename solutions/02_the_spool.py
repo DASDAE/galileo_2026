@@ -174,7 +174,7 @@ def _(df, spool):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ### Exercise (2.1)
+    ### **Exercise (2.1)**
     Determine how many files have a valid interrogator serial number set from the file.
     """)
     return
@@ -189,16 +189,25 @@ def _(mo):
 
 
 @app.cell
-def _(df, spool):
-    # An unset serial number is an empty string, not a missing value.
+def _(df):
+    # get_contents flattens nested attributes into dotted column names, so
+    # the interrogator's serial number is interrogator.serial_number. An
+    # unset one is an empty string, not NaN, so compare with "" rather than
+    # using isna().
     _has_serial = df["interrogator.serial_number"] != ""
     print(f"{_has_serial.sum()} of {len(df)} files carry a serial number")
-    print(
-        df.loc[_has_serial, ["tag", "interrogator.serial_number"]]
-        .drop_duplicates()
-        .to_string(index=False)
-    )
-    spool[_has_serial]
+
+    # Which kinds of file carry one, counted the way value_counts("tag")
+    # counted the tags above.
+    df[_has_serial].value_counts(["tag", "interrogator.serial_number"])
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    3 of the 49 files: the two OTDR traces (serial 0901001) and the 2 kHz DAS file (ONX 530001 P 535). The DSS files and the LF DAS files carry none, although the same Onyx recorded the LF DAS.
+    """)
     return
 
 
@@ -403,7 +412,7 @@ def _(dss_n180):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ### Exercise (2.2)
+    ### **Exercise (2.2)**
     Rechunk `spool_dss_blast` to 1 hour segments with 15 minutes of overlap, and examine the result.
     """)
     return
@@ -419,16 +428,31 @@ def _(mo):
 
 @app.cell
 def _(spool_dss_blast):
-    # Each window starts 45 minutes after the last, so consecutive patches
-    # share a quarter of an hour. The final, partial window is dropped unless
-    # keep_partial=True.
+    # time and overlap are in seconds: hour-long windows, each starting
+    # 45 minutes after the last. One DSS sample is one BOTDR sweep, and the
+    # sweeps come every 608 s, so an hour is 5.9 sweeps and 15 minutes is
+    # 1.5: DASCore sizes each chunk as the five sweeps that fit (four where
+    # a window boundary lands just before a sweep), so a patch spans about
+    # 40 minutes and consecutive patches share one sweep or none. The last,
+    # partial hour is dropped unless keep_partial=True. conflict="drop" for
+    # the same reason as above.
     _hourly_spool = spool_dss_blast.chunk(
-        time=3600, overlap=15 * 60, conflict="drop"
+        time=60 * 60, overlap=15 * 60, conflict="drop"
     )
+
+    # First and last sweep in each patch, and how many it holds.
     for _hour_patch in _hourly_spool:
         _time = _hour_patch.get_coord("time")
-        print(_time.min(), "to", _time.max(), _hour_patch.shape)
+        print(f"{_time.min()} to {_time.max()}: {len(_time)} sweeps")
     _hourly_spool
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    26 patches, all but two holding five sweeps, with one sweep repeated wherever two windows overlap.
+    """)
     return
 
 
@@ -485,10 +509,15 @@ def _(blast_time, dss_n180, lf_patch, plt):
     # day, the LF DAS record the 22 minutes around the blast. Only the units
     # are shared, so the colorbars read alike.
     _fig, _axes = plt.subplots(1, 2, figsize=(12, 6))
+
+    # Plot dss
     dss_n180.viz.waterfall(ax=_axes[0])
-    lf_patch.radians_to_strain().convert_units("microstrain").viz.waterfall(
-        ax=_axes[1]
-    )
+
+    # Convert lfdas to comparable units and plot
+    _lf_patch_ue = lf_patch.radians_to_strain().convert_units("microstrain")
+    _lf_patch_ue.viz.waterfall(ax=_axes[1])
+
+    # Plot the blast time and label
     for _ax in _axes:
         _ax.axhline(blast_time, color="lime", linestyle="--")
     _axes[0].set_title("DSS, N180")
@@ -501,8 +530,8 @@ def _(blast_time, dss_n180, lf_patch, plt):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ### Exercise (2.3)
-    Notebook 01 saw an offset at N180 after the blast.
+    ### **Exercise (2.3)**
+    Notebook 01 saw an offset at N180 after the blast. Let's revisit questions 1 and 2.
 
     1) In the N180 DSS and LF DAS records, do you see such an offset?
 
@@ -521,33 +550,38 @@ def _(mo):
 
 @app.cell
 def _(blast_time, dc, dss_n180, lf_patch, plt):
-    def _step_and_noise(patch, before, after, quiet):
-        # The change in mean strain across the blast, and the noise it has to
-        # stand above: the std over time in a window that excludes the blast.
-        _before = patch.select(time=before).mean("time").squeeze()
-        _after = patch.select(time=after).mean("time").squeeze()
-        _noise = patch.select(time=quiet).std("time").squeeze()
-        return _after - _before, _noise
+    def _step_and_noise(patch, before, after):
+        # The change in mean strain across the blast, and the single-sample
+        # scatter the exercise asks us to compare it with: std over time in
+        # the window before the blast. This is deliberately not the standard
+        # error of a mean, so the ratio below is not a significance test.
+        # mean("time") leaves a length-1 time axis; squeeze drops it, giving
+        # one value per channel. In a time range, ... means open at that
+        # end: (..., t) is everything up to t, (t, ...) everything after.
+        quiet = patch.select(time=before)
+        step = patch.select(time=after).mean("time") - quiet.mean("time")
+        return step.squeeze(), quiet.std("time").squeeze()
 
-    # A BOTDR sweep integrates for ten minutes, so the last one to finish
-    # before the blast starts at 10:01 and the first to start after it at
-    # 10:21; the sweep between straddles the blast and is left out. Every
-    # sweep before it is a noise sample.
+    _minute = dc.to_timedelta64(60)
+
+    # Use equally long windows on either side. The DSS comparison spans nine
+    # hours in each direction, with a 12-minute gap that excludes the sweeps
+    # nearest the blast; either of those may have been in progress at 10:13.
+    _dss_extent = 9 * dc.to_timedelta64(60 * 60)
+    _dss_gap = 12 * _minute
     _dss_step, _dss_noise = _step_and_noise(
         dss_n180,
-        before=(..., "2026-08-06T10:02"),
-        after=("2026-08-06T10:21", ...),
-        quiet=(..., "2026-08-06T10:02"),
+        before=(blast_time - _dss_extent, blast_time - _dss_gap),
+        after=(blast_time + _dss_gap, blast_time + _dss_extent),
     )
 
-    # The LF DAS response decays for about a minute, so start the after
-    # window a minute late. Over the whole record std("time") is dominated by
-    # the blast itself, hence the pre-blast window for the noise.
+    # For LF DAS, compare the minute immediately before the blast with the
+    # minute from 60 to 120 seconds after it. Matching the window lengths keeps
+    # a long-term drift from being mistaken for a step.
     _lf_step, _lf_noise = _step_and_noise(
         lf_patch.radians_to_strain().convert_units("microstrain"),
-        before=(..., blast_time),
-        after=(blast_time + dc.to_timedelta64(60), ...),
-        quiet=(..., blast_time),
+        before=(blast_time - _minute, blast_time),
+        after=(blast_time + _minute, blast_time + 2 * _minute),
     )
 
     _fig, _axes = plt.subplots(1, 2, figsize=(12, 4))
@@ -556,18 +590,23 @@ def _(blast_time, dc, dss_n180, lf_patch, plt):
         (_axes[1], _lf_step, _lf_noise, "LF DAS"),
     ]
     for _ax, _step, _noise, _title in _panels:
+        _distance = _step.get_array("distance")
+        _ax.plot(_distance, _step.data, label="after minus before")
         _ax.plot(
-            _step.get_array("distance"), _step.data, label="after minus before"
-        )
-        _ax.plot(
-            _noise.get_array("distance"),
-            _noise.data,
-            label="std before the blast",
+            _distance, _noise.data, label="single-sample std before blast"
         )
         _ax.set_xlabel("distance [m]")
         _ax.set_ylabel("strain [µε]")
         _ax.set_title(_title)
         _ax.legend()
+        # How far the step stands above the noise, channel by channel.
+        _ratio = abs(_step.data) / _noise.data
+        _above_noise = (_ratio > 1).sum()
+        print(
+            f"{_title}: |step| up to {abs(_step.data).max():.2g} µε, "
+            f"noise about {_noise.data.mean():.2g} µε, "
+            f"{_above_noise} of {len(_ratio)} channels above single-sample std"
+        )
     _fig
     return
 
@@ -575,9 +614,11 @@ def _(blast_time, dc, dss_n180, lf_patch, plt):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    1) Not in the DSS: the change in the mean is a few µε against about 13 µε of sweep-to-sweep noise, so nothing at N180 stands out after the blast. In the LF DAS the blast response decays back within about a minute, after which most of the hole sits within about 0.01 µε of its pre-blast level. One channel at the bottom of the hole (1608 m) keeps an offset of almost 0.1 µε, and a handful of its neighbours about 0.02 µε.
+    1) Not in the DSS: no channel's change in mean exceeds its sweep-to-sweep noise in the matched nine-hour windows. In the LF DAS, the large blast response has decayed sharply by 60 seconds, but the mean over 60-120 seconds still differs from the pre-blast minute on many channels.
 
-    2) The DSS step is well below the noise. The LF DAS offset that remains at the bottom of the hole is several times the pre-blast noise there, but on most channels it is not. Note that `std("time")` over the whole LF DAS record is dominated by the blast transient itself, which is why the noise is measured before it.
+    2) The DSS difference is below the single-sweep scatter on every channel. Several LF DAS residuals exceed the pre-blast single-sample `std("time")`, so they are visible in the recorded strain. This is the deliberately conservative comparison the exercise requests, not a significance test for a difference of means; that would use the standard error and account for temporal dependence. Exceeding this threshold also does **not** establish a permanent change in ground strain: the result depends on the chosen windows, and slow drift, coupling, or interrogator processing can produce a residual. We measure scatter before the event because `std("time")` over the whole LF DAS record would be dominated by the blast transient itself.
+
+    The safe conclusion is that the large offset in the five-second, 2 kHz record does not persist at the same amplitude in the continuous data. This comparison alone cannot determine whether the smaller LF DAS residual is ground deformation or an instrument-and-cable response.
     """)
     return
 
