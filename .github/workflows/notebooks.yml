@@ -36,7 +36,7 @@ jobs:
       # brings multi-gigabyte CUDA wheels on Linux x86_64. Install the same
       # versions without that extra on this CPU runner; `--no-sync` below
       # keeps uv from removing the overlay.
-      - run: uv pip install "dasjax==0.0.2" "jax==0.11.1"
+      - run: uv pip install "dasjax==0.0.3" "jax==0.11.1"
 
       - run: |
           for notebook in 0*_*.py; do

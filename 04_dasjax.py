@@ -6,7 +6,7 @@
 #     "marimo>=0.24",
 #     "matplotlib>=3.10",
 #     "numba",
-#     "dasjax==0.0.2",
+#     "dasjax==0.0.3",
 #     # JAX's default wheel is CPU only; the CUDA lines add the runtime a
 #     # molab GPU needs, on its Linux x86_64 platform, GPU attached or not.
 #     # It has to be the CUDA 13 family, pinned package by package: jaxlib
@@ -117,8 +117,10 @@ def _(band, blast_patch, dasjax):
         .normalize(dim="time", norm="l2")
     )
 
-    # Fail if a supported operation silently leaves the compiled path.
-    pipeline.assert_no_fallback(blast_patch)
+    # Fail if a supported operation silently leaves the compiled path: one
+    # planned segment, and it is the compiled one.
+    _plan = pipeline.plan(blast_patch)
+    assert len(_plan.segments) == 1 and _plan.fused_kernel_count == 1
 
     # CPU is always available; report why the optional GPU is not.
     kernels = {"cpu": pipeline.compile(backend="cpu")}
@@ -314,7 +316,9 @@ def _(blast_patch, dasjax, kernels, np):
         .clip(0.0, _display_range)
         .scale(1.0 / _display_range)
     )
-    _display_pipeline.assert_no_fallback(blast_patch)
+    _display_plan = _display_pipeline.plan(blast_patch)
+    assert len(_display_plan.segments) == 1
+    assert _display_plan.fused_kernel_count == 1
     prepare_kernels = {
         _name: _prepare_pipeline.compile(backend=_name) for _name in kernels
     }
@@ -401,7 +405,7 @@ def _(mo):
 
     ### **Exercise (4.1)**
 
-    Print `dasjax.list_operations()`, then add `.abs()` to both `dascore_chain` and `pipeline` in the first example. Does the fused extra operation change the timing?
+    Print `dasjax.list_patch_operations()`, then add `.abs()` to both `dascore_chain` and `pipeline` in the first example. Does the fused extra operation change the timing?
 
     ## Key Points
 

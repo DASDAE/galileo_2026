@@ -22,7 +22,7 @@ dependencies = [
 [project.optional-dependencies]
 # Bonus material; not needed for notebooks 01-03.
 bonus = [
-    "dasjax==0.0.2",
+    "dasjax==0.0.3",
     # The plain pins supply CPU JAX everywhere. Linux x86_64 -- molab's
     # platform, and the only one these wheels are built for -- also receives
     # the bundled CUDA runtime, a few gigabytes even on a CPU-only machine. It
