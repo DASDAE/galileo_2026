@@ -7,14 +7,17 @@
 #     "matplotlib>=3.10",
 #     "numba",
 #     "dasjax==0.0.2",
-#     # JAX's default wheel is CPU only. The last line adds its bundled CUDA
-#     # runtime on molab's Linux x86_64 platform, even before a GPU is
-#     # attached. jaxlib and jax-cuda12-plugin must report the exact same
-#     # version or the plugin is skipped, so the CUDA requirement carries the
-#     # pin itself rather than inheriting it from the plain one.
+#     # JAX's default wheel is CPU only; the CUDA lines add the runtime a
+#     # molab GPU needs, on its Linux x86_64 platform, GPU attached or not.
+#     # It has to be the CUDA 13 family, pinned package by package: jaxlib
+#     # probes CUDA 13 before CUDA 12, and molab's image carries a
+#     # jax-cuda13-plugin of its own version that poisons a CUDA 12 plugin
+#     # on the way past. Naming these shadows the image's copy rather than
+#     # colliding with it. AGENTS.md tells the whole story.
 #     "jax==0.11.1",
 #     "jaxlib==0.11.1",
-#     "jax[cuda12]==0.11.1; sys_platform == 'linux' and platform_machine == 'x86_64'",
+#     "jax-cuda13-plugin[with-cuda]==0.11.1; sys_platform == 'linux' and platform_machine == 'x86_64'",
+#     "jax-cuda13-pjrt==0.11.1; sys_platform == 'linux' and platform_machine == 'x86_64'",
 # ]
 # ///
 

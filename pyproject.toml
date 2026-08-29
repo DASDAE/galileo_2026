@@ -23,14 +23,17 @@ dependencies = [
 # Bonus material; not needed for notebooks 01-03.
 bonus = [
     "dasjax==0.0.2",
-    # The plain pins supply CPU JAX everywhere. Linux x86_64 also receives the
-    # bundled CUDA runtime -- a few gigabytes, even on a CPU-only machine.
-    # jaxlib and jax-cuda12-plugin must report the exact same version or the
-    # plugin is skipped, so the CUDA requirement carries the pin itself rather
-    # than inheriting it from the line below.
+    # The plain pins supply CPU JAX everywhere. Linux x86_64 -- molab's
+    # platform, and the only one these wheels are built for -- also receives
+    # the bundled CUDA runtime, a few gigabytes even on a CPU-only machine. It
+    # is the CUDA 13 family, pinned package by package, because jaxlib probes
+    # CUDA 13 before CUDA 12 and molab's image carries a jax-cuda13-plugin of
+    # its own version that poisons a CUDA 12 plugin on the way past. AGENTS.md
+    # explains it under "Environment".
     "jax==0.11.1",
     "jaxlib==0.11.1",
-    "jax[cuda12]==0.11.1; sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "jax-cuda13-plugin[with-cuda]==0.11.1; sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "jax-cuda13-pjrt==0.11.1; sys_platform == 'linux' and platform_machine == 'x86_64'",
 ]
 
 [build-system]
