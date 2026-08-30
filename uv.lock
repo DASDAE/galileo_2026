@@ -379,7 +379,7 @@ dependencies = [
 
 [[package]]
 name = "dasjax"
-version = "0.0.2"
+version = "0.0.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "dascore" },
@@ -387,9 +387,9 @@ dependencies = [
     { name = "pandas" },
     { name = "scipy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/69/71/180dc4740706a56e582d2682fac0d74b4729512b147dd35075d2e1e5e3ec/dasjax-0.0.2.tar.gz", hash = "sha256:0201d1a99df990fd1d043da6fa4de043e33b745010199d71d6be10c56e5ec054", size = 24538, upload-time = "2026-04-11T20:24:32.543Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/96/a8/ec6821c94059e99abf028e4ff82a4346dc35cd3f8b65abac53e3a014361e/dasjax-0.0.3.tar.gz", hash = "sha256:0396896bbc897d171a9e259f780db714820f56a61a915634a71fd87bcd2005bc", size = 65595, upload-time = "2026-08-30T09:04:27.812Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e7/1f/9f2c2ad0cd602eb4d46075a5bdafae08ba77139dbf5a8b4985ae1d96bd1d/dasjax-0.0.2-py3-none-any.whl", hash = "sha256:369852defbac7bf0d78e1d1b1bfe6e9c5fb998e37aa903c75e3b38e6ae6687c4", size = 21292, upload-time = "2026-04-11T20:24:31.189Z" },
+    { url = "https://files.pythonhosted.org/packages/ca/10/2c254488b2722f7b2e30c14767fb03fc9655e4d528239c6ec1f634cb2f17/dasjax-0.0.3-py3-none-any.whl", hash = "sha256:c4b956255f4ba37444c8a82e09deee6f2d3d18543184bee1e1a7d6333fdca343", size = 68420, upload-time = "2026-08-30T09:04:26.493Z" },
 ]
 
 [[package]]
@@ -503,7 +503,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "dascore", git = "https://github.com/DASDAE/dascore?rev=dev" },
-    { name = "dasjax", marker = "extra == 'bonus'", specifier = "==0.0.2" },
+    { name = "dasjax", marker = "extra == 'bonus'", specifier = "==0.0.3" },
     { name = "jax", marker = "extra == 'bonus'", specifier = "==0.11.1" },
     { name = "jax-cuda13-pjrt", marker = "platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'bonus'", specifier = "==0.11.1" },
     { name = "jax-cuda13-plugin", extras = ["with-cuda"], marker = "platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'bonus'", specifier = "==0.11.1" },
