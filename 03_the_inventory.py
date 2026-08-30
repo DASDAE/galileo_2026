@@ -54,7 +54,7 @@ def _(mo):
 
     just to name a few.
 
-    The inventory has approximately the same abstraction layers as the ubiquitous StationXML. In fact, DASCore's inventory is a superset of StationXML, which means in the future it will be possible to store both forms of metadata in a single container.
+    The inventory has approximately the same abstraction layers as the ubiquitous StationXML. In fact, DASCore's inventory is a superset of StationXML, which means in the future it will be possible to store both forms of metadata in a single container. The acquisition and interrogator fields likewise line up with what community DAS metadata efforts collect, so an inventory is a place for that information to live next to the fiber it describes.
 
     The Inventory has the following form:
     """)
@@ -164,6 +164,38 @@ def _(inv):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
+    The inventory also answers questions on its own, before any waveform data enters the picture. `resolve` takes an acquisition key and hands back the matching pieces; the optical path's `labels` say which stretch of fiber is which borehole, and `coordinates_at` places any fiber distance in space. Together, that is enough to look up a hole's depth:
+    """)
+    return
+
+
+@app.cell
+def _(inv, np):
+    _path = inv.resolve("XM.MINE1.03.WSF").optical_path
+
+    # The label records the fiber-distance interval; it is half-open, so
+    # stay just inside its far end.
+    _label = next(
+        _lbl
+        for _lbl in _path.labels
+        if _lbl.group == "borehole" and _lbl.value == "N180"
+    )
+    _dist = np.linspace(_label.distance_min, _label.distance_max - 0.01, 200)
+    _z = _path.coordinates_at(_dist, inv.coordinate_reference_system)[:, 2]
+
+    print(
+        f"N180 is fiber distance [{_label.distance_min:.1f}, "
+        f"{_label.distance_max:.1f}) m"
+    )
+    print(f"and reaches {_z.max() - _z.min():.1f} m below its collar")
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    That said, once data is in play it is usually easier to let the inventory push what it knows onto the patches, and read it from there -- which is what the rest of this notebook is about.
+
     ## Inventory-Spool integration
 
     On its own, the inventory is just a description. It becomes useful when coupled to the spool, but the degree and type of coupling depends on what you are trying to do.
@@ -339,6 +371,11 @@ def _(mo):
 
     Take the low-frequency DAS data, keep only the downgoing leg of each borehole in the south drift, and work out how many channels that leaves. Then compare the mean strain in the top 5 m of the holes against the bottom 5 m — `hole_depth` is the coordinate you want.
     """)
+    return
+
+
+@app.cell
+def _():
     return
 
 

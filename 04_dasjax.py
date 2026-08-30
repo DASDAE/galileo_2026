@@ -402,11 +402,28 @@ def _(blast_window, displayed):
 def _(mo):
     mo.md(r"""
     The overall speedup includes compiled detrending and normalization; `extra_ops_ms` estimates the marginal cost of the four display operations, and values near or below zero are timing noise. DASCore materializes each result, while DASJax can fuse compatible work into the existing program. Both paths preserve the input dtype, so lower precision explains none of the difference.
+    """)
+    return
 
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
     ### **Exercise (4.1)**
 
     Print `dasjax.list_patch_operations()`, then add `.abs()` to both `dascore_chain` and `pipeline` in the first example. Does the fused extra operation change the timing?
+    """)
+    return
 
+
+@app.cell
+def _():
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
     ## Key Points
 
     - `compile()` returns a reusable `Patch -> Patch` callable; compatible shape-preserving operations share JIT segments that XLA can fuse.

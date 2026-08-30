@@ -49,7 +49,22 @@ def _():
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    If that printed four rows without error, you are ready.
+    If that printed a dascore version and four rows of file counts without error, you are ready.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## New to marimo?
+
+    Two minutes of orientation, if this is your first marimo notebook:
+
+    - **Run a cell** with the play button on its right, or `Ctrl+Enter` (`Cmd+Enter` on Mac). `Shift+Enter` runs and moves to the next cell.
+    - **Add a cell** by hovering just above or below an existing cell -- a small `+` button appears at the left edge. The exercises in the tutorial notebooks each have an empty cell waiting, so you rarely need to.
+    - **Two kinds of output**: whatever `print()` writes lands in the *console* area attached below the cell, while the cell's **last expression** is rendered richly above it -- that is where tables, patches and figures appear.
+    - Cells **react**: when you change a variable, every cell that uses it reruns by itself. That also means a variable can only be defined in one cell.
     """)
     return
 

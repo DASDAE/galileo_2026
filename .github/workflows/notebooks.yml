@@ -39,8 +39,22 @@ jobs:
       - run: uv pip install "dasjax==0.0.3" "jax==0.11.1"
 
       - run: |
-          for notebook in 0*_*.py; do
+          for notebook in 0*_*.py solutions/0*_*.py; do
             echo "::group::$notebook"
             uv run --no-sync python "$notebook"
             echo "::endgroup::"
           done
+
+      # The solutions are hand-maintained copies, so hold them to the
+      # exercise notebooks: every exercise header must appear in both.
+      - run: |
+          rc=0
+          for notebook in solutions/0*_*.py; do
+            exercise="$(basename "$notebook")"
+            if ! diff <(grep -o "### \*\*Exercise ([0-9.]*)\*\*" "$exercise") \
+                      <(grep -o "### \*\*Exercise ([0-9.]*)\*\*" "$notebook"); then
+              echo "::error::exercise headers differ between $exercise and $notebook"
+              rc=1
+            fi
+          done
+          exit $rc

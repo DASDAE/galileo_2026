@@ -47,7 +47,7 @@ def _(mo):
     /// note
     The `Spool` manages a source of patches. In this case, a directory of fiber data files.
 
-    Sometimes, for organization and metadata association, it is helpful to add metadata to files/patches. However, it is not practical (and quite bad practice) to change the raw data files. DASCore provides a simple way to add metadata based on the folder name.
+    Sometimes, for organization and metadata association, it is helpful to add metadata to files/patches. However, it is not practical (and bad practice) to change the raw data files. DASCore provides a simple way to add metadata based on the folder name.
 
     For example, this dataset is organized like this:
 
@@ -175,6 +175,11 @@ def _(mo):
     ### **Exercise (2.1)**
     Determine how many files have a valid interrogator serial number set from the file.
     """)
+    return
+
+
+@app.cell
+def _():
     return
 
 
@@ -370,6 +375,9 @@ def _(mo):
 @app.cell
 def _(dss_n180):
     dss_n180_processed = (
+        # demedian removes each time sample's offset (the horizontal stripes);
+        # rolling(distance=1) averages a 1 m window, ten channels at this
+        # 0.1 m spacing, to tame the channel-to-channel speckle.
         dss_n180.demedian("distance").rolling(distance=1).mean()
     )
     dss_n180_processed.viz.waterfall()
@@ -379,8 +387,16 @@ def _(dss_n180):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
+    Still noisy -- BOTDR near its resolution limit is -- but the horizontal striping is gone, and what to look for now stands out: the red column near 2550 m, strain building up over the hours around the blast, against fiber that stays quiet.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
     ### **Exercise (2.2)**
-    Rechunk `spool_dss_blast` to 1 hour segments with 15 minutes of overlap, and examine the result.
+    Rechunk `spool_dss_blast` to 1 hour segments with 15 minutes of overlap, and examine the result. Look at each patch's start and end times: do they behave the way you expected? (Hint: a DSS sweep arrives about every ten minutes, and a chunk can only hold whole sweeps.)
     """)
     return
 
@@ -451,9 +467,9 @@ def _(blast_time, dss_n180, lf_patch, plt):
     _lf_patch_ue = lf_patch.radians_to_strain().convert_units("microstrain")
     _lf_patch_ue.viz.waterfall(ax=_axes[1])
 
-    # Plot the blast time and label
+    # Plot the blast time
     for _ax in _axes:
-        _ax.axhline(blast_time, color="lime", linestyle="--")
+        _ax.axhline(blast_time, color="lime", linestyle="--", linewidth=2.5)
     _axes[0].set_title("DSS, N180")
     _axes[1].set_title("LF DAS, N180")
     _fig.tight_layout()
@@ -469,8 +485,13 @@ def _(mo):
 
     1) In the N180 DSS and LF DAS records, do you see such an offset?
 
-    2) If so, is the step visible above the noise (`std('time')`)?
+    2) If so, is the step visible above the noise? That is, estimate each channel's pre-blast noise level with `std("time")` on a window before the blast, and compare the size of the step to it.
     """)
+    return
+
+
+@app.cell
+def _():
     return
 
 
@@ -511,8 +532,41 @@ def _(dc, dss_n180_dist, spool):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    In this case, we created a list of patches and concatenated them. In practice, it is often necessary to save the patch to disk in the function used with map to avoid running out of memory.
+    In this case, we created a list of patches and concatenated them. In practice, when the results are too big to keep in memory, save each patch to disk inside the mapped function and return something small instead:
+    """)
+    return
 
+
+@app.cell
+def _(dc, dss_n180_dist, spool):
+    from pathlib import Path
+    from tempfile import mkdtemp
+
+    _out_dir = Path(mkdtemp(prefix="hourly_means_"))
+
+    def _save_hourly_mean(patch):
+        reduced = patch.mean("time", dim_reduce="mean")
+        # Name the file by its start time; ":" is not portable in file names.
+        start = str(reduced.get_coord("time").min()).replace(":", "-")
+        path = _out_dir / f"{start}.h5"
+        reduced.io.write(path, "dasdae")
+        return path  # a path, not a patch: nothing big stays in memory
+
+    _paths = (
+        spool.select(tag="DSS", distance=dss_n180_dist)
+        .chunk(time=3600, conflict="drop")
+        .map(_save_hourly_mean)
+    )
+    print(f"wrote {len(_paths)} files to {_out_dir}")
+
+    # The saved files are themselves a spool, ready for the next step.
+    dc.spool(_out_dir).update().get_contents().head()
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
     Also note, `Spool.map` supports several types of parallelism using the `client` argument.
     """)
     return

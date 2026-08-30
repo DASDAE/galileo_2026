@@ -134,14 +134,24 @@ def _(mo):
 
 
 @app.cell
-def _(patch):
-    print("dimensions:", patch.dims)
-    print("coordinates:", patch.coords)
-    print("metadata:", patch.attrs)
-
-    # Leave a small slice as the final expression so marimo renders the array
-    # without trying to display the entire recording.
-    patch.data[:, :5]
+def _(mo, patch):
+    # Stack the parts so each renders in the cell output rather than the
+    # console. The data slice stays small so marimo does not try to display
+    # the entire recording.
+    mo.vstack(
+        [
+            mo.md("**`patch.dims`** -- the dimension names:"),
+            patch.dims,
+            mo.md("**`patch.coords`** -- the labels along each axis:"),
+            patch.coords,
+            mo.md("**`patch.attrs`** -- the scalar metadata:"),
+            patch.attrs,
+            mo.md(
+                "**`patch.data`** -- the array itself (a small corner of it):"
+            ),
+            patch.data[:, :5],
+        ]
+    )
     return
 
 
@@ -210,7 +220,7 @@ def _(blast_time_zoom_2, n180_patch):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    Zooming out and selecting the channel at the bottom of the hole, we see all the charges clearly.
+    Zooming out and selecting the channel at the bottom of the hole, we see all the charges clearly. Notice how each charge adds its own step to the strain record, ratcheting it up charge by charge -- keep that in mind for Q1 below, which asks whether those steps are real deformation or an instrument artifact.
     """)
     return
 
@@ -389,7 +399,7 @@ def _(blast_time_zoom_0, dc, plt, processed):
     _ax.set_ylabel("mean envelope of strain rate")
     _ax.set_title(f"{len(_peaks)} peaks")
     _ax
-    return (peak_times,)
+    return find_peaks, peak_times
 
 
 @app.cell(hide_code=True)
