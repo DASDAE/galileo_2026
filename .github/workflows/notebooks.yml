@@ -51,9 +51,15 @@ jobs:
           rc=0
           for notebook in solutions/0*_*.py; do
             exercise="$(basename "$notebook")"
-            if ! diff <(grep -o "### \*\*Exercise ([0-9.]*)\*\*" "$exercise") \
-                      <(grep -o "### \*\*Exercise ([0-9.]*)\*\*" "$notebook"); then
+            ours="$(grep -o "### \*\*Exercise ([0-9.]*)\*\*" "$exercise" || true)"
+            theirs="$(grep -o "### \*\*Exercise ([0-9.]*)\*\*" "$notebook" || true)"
+            # An empty extraction means the pattern rotted, not a clean pass.
+            if [ -z "$ours" ]; then
+              echo "::error::$exercise has no exercise headers to compare"
+              rc=1
+            elif [ "$ours" != "$theirs" ]; then
               echo "::error::exercise headers differ between $exercise and $notebook"
+              diff <(echo "$ours") <(echo "$theirs") || true
               rc=1
             fi
           done
