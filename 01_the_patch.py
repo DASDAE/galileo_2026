@@ -32,9 +32,8 @@ def _(mo):
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _():
-
     import dascore as dc
     import matplotlib.pyplot as plt
     import numpy as np
@@ -100,6 +99,7 @@ def _(mo):
 
 @app.cell
 def _(spool):
+    # Get the first patch in the spool and convert from phase angle to strain. 
     patch = spool[0].radians_to_strain()
     return (patch,)
 
@@ -134,24 +134,11 @@ def _(mo):
 
 
 @app.cell
-def _(mo, patch):
-    # Stack the parts so each renders in the cell output rather than the
-    # console. The data slice stays small so marimo does not try to display
-    # the entire recording.
-    mo.vstack(
-        [
-            mo.md("**`patch.dims`** -- the dimension names:"),
-            patch.dims,
-            mo.md("**`patch.coords`** -- the labels along each axis:"),
-            patch.coords,
-            mo.md("**`patch.attrs`** -- the scalar metadata:"),
-            patch.attrs,
-            mo.md(
-                "**`patch.data`** -- the array itself (a small corner of it):"
-            ),
-            patch.data[:, :5],
-        ]
-    )
+def _(patch):
+    _dims = patch.dims
+    _coords = patch.coords
+    _attrs = patch.attrs
+    _data = patch.data
     return
 
 
@@ -220,7 +207,7 @@ def _(blast_time_zoom_2, n180_patch):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    Zooming out and selecting the channel at the bottom of the hole, we see all the charges clearly. Notice how each charge adds its own step to the strain record, ratcheting it up charge by charge -- keep that in mind for Q1 below, which asks whether those steps are real deformation or an instrument artifact.
+    Zooming out and selecting the channel at the bottom of the hole, we see all the charges clearly. Notice how each charge adds its own step to the strain record, ratcheting it up charge by charge (keep that in mind for Q1 below).
     """)
     return
 
@@ -240,7 +227,7 @@ def _(mo):
 
     **1) There is significant offset caused by the blast.**
 
-    The blast might have caused permanent deformation to the ground — that is the point of blasting in a mine, after all — but the dynamic response of the instrument could have been exceeded in these near-field recordings.
+    The blast might have caused permanent deformation to the ground, that is the point of blasting in a mine, but the dynamic response of the instrument could have been exceeded in these near-field recordings.
 
     Q1: *Is the blast offset physical or an artifact of phase-unwrapping errors?*
 
@@ -261,7 +248,7 @@ def _(mo):
 
     Let's set aside the strain offset questions for now. We will use the other datasets to explore these. Instead, let's focus on the charge waveforms.
 
-    A simple filter is a quick way to remove the offsets. `Patch.pass_filter` is a standard Butterworth filter with corners in the inverse of the dimension's units, e.g., `time=(5, 200)` is 5 to 200 Hz. This alleviates the offset issue, but does cause some noticeable filter effects in the center of the borehole.
+    A simple filter is a quick way to remove the offsets. `Patch.pass_filter` is a standard Butterworth filter. This alleviates the offset issue, but does cause some noticeable filter effects in the center of the borehole.
     """)
     return
 
@@ -283,7 +270,7 @@ def _(blast_time_zoom_0, borehole_distances, patch, plt):
     _axes[0].set_title("unfiltered")
     _axes[1].set_title("5 to 200 Hz")
     _fig
-    return (n180_blast_filtered,)
+    return
 
 
 @app.cell(hide_code=True)
@@ -291,11 +278,9 @@ def _(mo):
     mo.md(r"""
     ### **Exercise (1.1)**:
 
-    1) Assuming the borehole is symmetric, select the downgoing leg of N180 and zoom into the blast front more in the same select call.
+    1) Use select to make a plot of N180 zoomed into the first charge. `blast_time_zoom_2` and the `borehole_distances` map can help here.
 
     2) Plot the result with a different colormap.
-
-    3) `decimate(time=4)` the filtered patch and plot it again. What changed, and what did not?
     """)
     return
 
@@ -357,7 +342,7 @@ def _(mo):
     mo.md(r"""
     ### Counting the charges
 
-    Assuming the moveout over the array isn't large enough to smear peaks from different charges together, averaging the envelope over the leg gives a single trace where each charge should have a peak. We can use `find_peaks` to count them.
+    Assuming the moveout over the array isn't large enough to smear the peaks from different charges together when stacking, averaging the envelope over the leg gives a single trace where each charge should have a peak. We can use `find_peaks` to count them.
     """)
     return
 
@@ -399,7 +384,7 @@ def _(blast_time_zoom_0, dc, plt, processed):
     _ax.set_ylabel("mean envelope of strain rate")
     _ax.set_title(f"{len(_peaks)} peaks")
     _ax
-    return find_peaks, peak_times
+    return (peak_times,)
 
 
 @app.cell(hide_code=True)
@@ -480,7 +465,8 @@ def _(mo):
 
 
 @app.cell
-def _():
+def _(peak_times):
+    1/ (peak_times[1:] - peak_times[:-1])
     return
 
 
@@ -497,21 +483,20 @@ def _(mo):
 @app.cell
 def _(blast_time_zoom_1, ms, processed):
     cc = (
-        processed.select(
-            time=blast_time_zoom_1  # Zoom in around the first charge
-        )
-        .taper(time=10 * ms)  # taper the window we are about to transform
-        .correlate(
-            distance=0,
-            samples=True,  # correlate all channels against the first channel
-        )
-        .squeeze()  # drop the length-1 source dimension
-        .select(
-            lag_time=(
-                -0.02,
-                0.02,
-            )  # Select lag times around reasonable velocities
-        )
+        # Zoom in around the first charge
+        processed.select(time=blast_time_zoom_1)
+        
+        # taper the window we are about to transform
+        .taper(time=10 * ms)  
+        
+        # correlate all channels against the first channel
+        .correlate(distance=0, samples=True)
+        
+         # drop the length-1 source dimension
+        .squeeze() 
+        
+        # Select lag times around reasonable velocities
+        .select(lag_time=(-0.02,0.02))
     )
 
     cc.viz.waterfall()
@@ -539,8 +524,10 @@ def _(cc, dc, np):
 
 @app.cell
 def _(cc, distance, intercept, slope):
-    # Plot
+    # Plot, return the MPL axis
     _ax = cc.viz.waterfall(show=False, cmap="seismic", scale=0.3)
+
+    # Reuse MPL axis to plot intercept
     _ = _ax.plot(
         distance, slope * distance + intercept, "--", color="0.5", lw=4
     )

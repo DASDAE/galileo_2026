@@ -51,20 +51,18 @@ def _(mo):
 
     For example, this dataset is organized like this:
 
-    ```text
-    fiber/
-    ├── tag=DSS__acquisition_key=XM.MINE1.03.WSF/
+    <pre><code>fiber/
+    ├── <mark>tag=</mark>DSS__<mark>acquisition_key=</mark>XM.MINE1.03.WSF/
     │   ├── conf2-strainmonitoring2_C1_2026-08-06T01.02.56+0200.bsl.h5
     │   └── ...
-    ├── tag=DAS_LF__acquisition_key=XM.MINE1.04.MSF/
+    ├── <mark>tag=</mark>DAS_LF__<mark>acquisition_key=</mark>XM.MINE1.04.MSF/
     │   ├── LowFrequency_Decimator_2_2026-08-06_10.09.54_UTC_010214.raw
     │   └── ...
-    ├── tag=DAS__acquisition_key=XM.MINE1.04.FSF/
+    ├── <mark>tag=</mark>DAS__<mark>acquisition_key=</mark>XM.MINE1.04.FSF/
     │   └── blast.h5
-    └── tag=OTDR/
+    └── <mark>tag=</mark>OTDR/
         ├── channel_3_otdr.sor
-        └── channel_4_otdr.sor
-    ```
+        └── channel_4_otdr.sor</code></pre>
 
     Every patch read out of the first directory carries `tag == "DSS"` and `acquisition_key == "XM.MINE1.03.WSF"`, although neither string appears anywhere inside the file. By design, this does not apply to the top-level directory or to file names. A directory may carry several key=value pairs joined by `__`.
 
@@ -76,7 +74,6 @@ def _(mo):
 
 @app.cell
 def _():
-
     import dascore as dc
     import matplotlib.pyplot as plt
     import numpy as np
@@ -164,7 +161,11 @@ def _(mo):
 
 @app.cell
 def _(df, spool):
-    lf_spool = spool[df["tag"] == "DAS_LF"]
+    # Get a bool series, each row indicates if tag == DAS_Lf
+    _is_lf_das = df["tag"] == "DAS_LF"
+
+    # Use this to filter the contents of the spool
+    lf_spool = spool[_is_lf_das]
     print(f"{len(lf_spool)} low-frequency DAS patches")
     return (lf_spool,)
 
@@ -268,7 +269,7 @@ def _(mo):
 
 @app.cell
 def _(das_lf_patch):
-
+    # Convert to strain, scale waterfall with absolute values. 
     das_lf_patch.radians_to_strain().viz.waterfall(
         scale=(-3e-7, 3e-7), scale_type="absolute"
     )
@@ -349,11 +350,19 @@ def _(mo):
 
 @app.cell
 def _(dss_n180_dist, dss_patch):
-    # We trim the patch with relative=True (relative to start/end)
-    _first_hour = dss_patch.select(time=(..., 60 * 60), relative=True)
+    # Trim the patch
+    _first_hour = dss_patch.select(
+        time=(..., 60 * 60),  # ... (and None) mean open bounds 
+        relative=True  # Relative to start/end of patch
+    )
+
+    # Aggregate (stack) in time, and get rid of collapsed dim.
     _averaged_first_hour = _first_hour.mean("time").squeeze()
 
+    # Add baseline to DSS (the averaged first hour).
     _corrected = dss_patch - _averaged_first_hour
+
+    # Select just the N180 borehole. 
     dss_n180 = _corrected.select(distance=dss_n180_dist)
     return (dss_n180,)
 
@@ -373,21 +382,34 @@ def _(mo):
 
 
 @app.cell
-def _(dss_n180):
+def _(blast_time, dss_n180):
     dss_n180_processed = (
-        # demedian removes each time sample's offset (the horizontal stripes);
+        # demedian removes the offsets (the horizontal stripes);
         # rolling(distance=1) averages a 1 m window, ten channels at this
         # 0.1 m spacing, to tame the channel-to-channel speckle.
         dss_n180.demedian("distance").rolling(distance=1).mean()
     )
-    dss_n180_processed.viz.waterfall()
+
+    # Plot the waterfall with the blast time
+    _ax = dss_n180_processed.viz.waterfall()
+    _ax.axhline(blast_time, color='white', lw=4, ls='--')
+
+    return (dss_n180_processed,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ///Note
+    Q3: What assumptions are we making by removing the median offset in DSS data? When might this be wrong?
+    """)
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    Still noisy -- BOTDR near its resolution limit is -- but the horizontal striping is gone, and what to look for now stands out: the red column near 2550 m, strain building up over the hours around the blast, against fiber that stays quiet.
+    Still noisy, the instrument is near its noise floor, but the horizontal striping is gone, and what to look for now stands out: the red column near 2553 m, possibly strain building up over the hours around the blast.
     """)
     return
 
@@ -427,7 +449,7 @@ def _(mo):
     mo.md(r"""
     Whether the gaps break a merge is controlled by the `tolerance` parameter in `Spool.chunk`. `tolerance` is an integer number of samples or a quantity with units.
 
-    At 5 Hz the default of 1.5 samples is 0.3 s, every gap here is wider, and `chunk(time=None)` keeps those files apart; ten samples forgives two seconds and merges all the files, but DASCore warns that the coordinate may have been altered. In this case, squashing the gaps is fine.
+    At 5 Hz the default of 1.5 samples is 0.3 s, every gap here is wider, and `chunk(time=None)` keeps those files apart; ten samples forgives two seconds and merges all the files, but DASCore warns that the coordinate may have been altered. In this case, squashing the gaps is fine but be careful with large tolerance values!
 
     To compare to the DSS record, we will simply look at the N180 section, which for this optical path is **distance=(1577.9, 1634.7)**:
     """)
@@ -436,8 +458,12 @@ def _(mo):
 
 @app.cell
 def _(lf_spool, lfdas_n180_dist):
-    _merged = lf_spool.select(distance=lfdas_n180_dist).chunk(
-        time=None, conflict="drop", tolerance=10
+    _merged = (
+        # Select on N180
+        lf_spool.select(distance=lfdas_n180_dist)
+        
+        # Chunk over time, merging patches with gaps < 10 * dt
+        .chunk(time=None, conflict="drop", tolerance=10)
     )
     assert len(_merged) == 1
     lf_patch = _merged[0]
@@ -454,14 +480,14 @@ def _(mo):
 
 
 @app.cell
-def _(blast_time, dss_n180, lf_patch, plt):
+def _(blast_time, dss_n180_processed, lf_patch, plt):
     # Each panel keeps its own time and color scale: the DSS record spans the
     # day, the LF DAS record the 22 minutes around the blast. Only the units
     # are shared, so the colorbars read alike.
     _fig, _axes = plt.subplots(1, 2, figsize=(12, 6))
 
     # Plot dss
-    dss_n180.viz.waterfall(ax=_axes[0])
+    dss_n180_processed.viz.waterfall(ax=_axes[0])
 
     # Convert lfdas to comparable units and plot
     _lf_patch_ue = lf_patch.radians_to_strain().convert_units("microstrain")
@@ -542,9 +568,11 @@ def _(dc, dss_n180_dist, spool):
     from pathlib import Path
     from tempfile import mkdtemp
 
+    # Make a temporary folder
     _out_dir = Path(mkdtemp(prefix="hourly_means_"))
 
     def _save_hourly_mean(patch):
+        """A function to map over the spool that also saves. """
         reduced = patch.mean("time", dim_reduce="mean")
         # Name the file by its start time; ":" is not portable in file names.
         start = str(reduced.get_coord("time").min()).replace(":", "-")

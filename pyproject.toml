@@ -58,20 +58,12 @@ line-length = 79
 target-version = "py312"
 
 [tool.ruff.lint]
-select = ["D", "N", "I", "E", "F", "UP", "RUF"]
-ignore = ["D105", "D107", "D401", "D205", "D200", "D400"]
-
-[tool.ruff.lint.per-file-ignores]
-# The tutorial notebooks are marimo notebooks: generated Python whose shape is
-# not ours to choose. Markdown cells are string literals and this repo does not
-# hard-wrap prose (E501), and there is nowhere to put a module docstring above
-# the PEP 723 header (D100). Setup cells also import, and stub cells also bind,
-# what the exercises below them will use, so both can be unused until that
-# notebook's content is written (F401, F841).
-"0*_*.py" = ["D100", "E501", "F401", "F841"]
-
-[tool.ruff.lint.pydocstyle]
-convention = "numpy"
+# Linting is off for this repo; only the formatter runs. An empty `select`
+# clears ruff's built-in defaults as well, so `ruff check` and any editor
+# integration stay quiet instead of falling back to E4/E7/E9/F. The previous
+# rule set, and the marimo-notebook exemptions that went with it, are in git
+# history if they are ever wanted back.
+select = []
 
 [tool.ruff.format]
 docstring-code-format = true

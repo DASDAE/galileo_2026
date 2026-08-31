@@ -57,7 +57,7 @@ A marimo notebook is a dependency graph, not a list of cells, and that constrain
 
 ## Notebooks in git
 
-A marimo notebook holds no outputs, so it commits as ordinary python: no filter, no `.gitattributes` entry, and `git diff` shows the change that matters. Ruff lints and formats them alongside the rest of the repo, under the exemptions `pyproject.toml` explains.
+A marimo notebook holds no outputs, so it commits as ordinary python: no filter, no `.gitattributes` entry, and `git diff` shows the change that matters. Ruff formats them alongside the rest of the repo; lint rules are disabled, as `pyproject.toml` explains.
 
 They were converted from Jupyter with `marimo convert`; `marimo export ipynb` goes back the other way if a Colab fallback is ever wanted again.
 
