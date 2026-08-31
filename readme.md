@@ -19,15 +19,15 @@ Data and code for the [Galileo 2026](https://www.egu-galileo.eu/gc14-fibreoptic/
 
 We will primarily cover 3 notebooks that explain DASCore using a real research dataset.
 
-| Notebook | Topic | molab |
-| --- | --- | --- |
-| `00_setup.py` | Check your environment and data | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/00_setup.py) |
-| `01_the_patch.py` | The `Patch`: filtering, transforms and plots | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/01_the_patch.py) |
-| `02_the_spool.py` | The `Spool`: an archive, selected and re-cut | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/02_the_spool.py) |
-| `03_the_inventory.py` | The observing system, with `Inventory` | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/03_the_inventory.py) |
+| Notebook | Topic | molab | solutions |
+| --- | --- | --- | --- |
+| `00_setup.py` | Check your environment and data | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/00_setup.py) | -- |
+| `01_the_patch.py` | The `Patch`: filtering, transforms and plots | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/01_the_patch.py) | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/solutions/01_the_patch.py) |
+| `02_the_spool.py` | The `Spool`: an archive, selected and re-cut | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/02_the_spool.py) | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/solutions/02_the_spool.py) |
+| `03_the_inventory.py` | The observing system, with `Inventory` | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/03_the_inventory.py) | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/DASDAE/galileo_2026/blob/main/solutions/03_the_inventory.py) |
 
 
-The same three notebooks with every exercise worked are in [`solutions/`](solutions/); open them the same way.
+The solutions column opens the same notebook with every exercise worked; the files live in [`solutions/`](solutions/).
 
 
 ### **Bonus**: The Need for Speed
@@ -78,22 +78,16 @@ The bonus notebook is the one place the machine matters: molab's *notebook specs
 
 **Please do this before you arrive.** Conference wifi is not a good place to install a scientific python stack for the first time.
 
-To open a single marimo file using its own requirements, run:
-
-```bash
-uvx marimo edit --sandbox 00_setup.py
-```
-
-That installs this repository from GitHub, data included -- about fifty megabytes -- and unpacks the recordings into `galileo_2026_data` beside the notebook.
-
-Cloning is still the better way to work through the session, since it brings all five notebooks and lets you read the data in place:
+First get the repository, with git or without -- either way you end up with the same folder:
 
 ```bash
 git clone https://github.com/DASDAE/galileo_2026
 cd galileo_2026
 ```
 
-Without git, take the ZIP from the green *Code* button on [the repo page](https://github.com/DASDAE/galileo_2026) instead. From a clone, [uv](https://docs.astral.sh/uv/) builds one environment for every notebook:
+Without git, take the ZIP from the green *Code* button on [the repo page](https://github.com/DASDAE/galileo_2026), unzip it, and `cd` into it.
+
+From that folder, [uv](https://docs.astral.sh/uv/) builds one environment for every notebook:
 
 ```bash
 uv run marimo edit
@@ -108,13 +102,22 @@ python -m pip install -e .     # use ".[bonus]" if you want notebook 04
 marimo edit
 ```
 
-The `bonus` extra is a heavy one on Linux: it brings JAX's CUDA wheels, a few gigabytes of them, so that notebook 04 can reach a GPU. Everywhere else it installs the CPU build and the notebook runs the same, just slower.
-
 Either way this pulls DASCore from its `dev` branch -- the inventory, the OTDR reader and the hive-style directory attributes are not released yet -- so the install needs git on your path and a few minutes.
 
-Run `00_setup.py`. If it prints a DASCore version and four rows of file counts, you are ready for the session.
+Then open `00_setup.py` in the marimo browser tab and run it. If it prints a DASCore version and four rows of file counts, you are ready for the session.
+
+(One more option, for the curious: `uvx marimo edit --sandbox 00_setup.py` opens a single notebook file in its own throwaway environment, no clone needed -- it fetches this repository, data included, and unpacks the recordings into `galileo_2026_data` beside the notebook. Cloning is still the better way to work through the session.)
+
+### If something goes wrong
+
+- The DASCore install comes from a git branch, so it needs `git` on your path even if you took the ZIP, and the first install takes a few minutes. `error: ... git ... not found` means install git first.
+- Do not put the folder inside Dropbox, OneDrive, or another synced directory: the syncer fights the `.venv` and the install gets slow or breaks in strange ways. Clone somewhere plain instead.
+- The `bonus` extra is a heavy one on Linux: it brings JAX's CUDA wheels, a few gigabytes of them, so that notebook 04 can reach a GPU. Everywhere else it installs the CPU build and the notebook runs the same, just slower. Skip it if you are short on bandwidth -- notebook 04 also runs fine on molab.
+- If the local install keeps fighting you, stop: the molab links above are the fallback, and they need nothing but a browser. Come a few minutes early and we will sort the local install out.
 
 # Building the site
+
+*Maintainers only -- attendees can skip this section entirely.*
 
 The landing page and both slide decks are one [quarto](https://quarto.org) project, so one command builds all of it into `_site`:
 
