@@ -607,7 +607,158 @@ def _(dc, find_peaks, n180_spectrum, np, peak_times):
 def _(mo):
     mo.md(r"""
     Looking at every detected peak gives a 10 Hz spacing, but the plot separates two families: the taller red teeth fall near multiples of the predicted 20 Hz spacing, while the smaller orange teeth sit between them. The 50 ms charge spacing therefore explains the dominant teeth. The interleaved teeth imply a pattern that repeats every 100 ms, but this record cannot distinguish a missing charge from one that fired too weakly to pick in the envelope. Nor can one blast rule out another source of a 10 Hz comb, so treat this as a hypothesis that fits rather than a reconstructed firing record.
+
+    ### Seeing the 100 ms repeat
+
+    Both domains show it, side by side. In time, the picked charges sit on a 50 ms grid, but the pick heights tend to alternate strong/weak -- consistent with a repeating unit, a strong charge plus a weak one, spanning 100 ms (with the caveat above: envelope height is a proxy, not a firing record, and the alternation is not perfect). A comb's tooth spacing reads the repeat period of the *whole pattern*, so a 100 ms unit puts teeth every 1 / 100 ms = 10 Hz, while the 50 ms grid inside it survives as the taller every-other tooth on the 20 Hz grid.
     """)
+    return
+
+
+@app.cell
+def _(blast_time_zoom_0, dc, find_peaks, n180_spectrum, np, plt, processed):
+    # Rebuild the mean envelope and its picks from the counting cell above.
+    _envelope = (
+        processed.envelope("time")
+        .select(time=blast_time_zoom_0)
+        .mean("distance")
+        .squeeze()
+    )
+    _time_coord = _envelope.get_array("time")
+    _time = dc.to_float(_time_coord - _time_coord[0])
+    _step = dc.to_float(_envelope.get_coord("time").step)
+    _picks, _ = find_peaks(
+        _envelope.data,
+        height=0.1 * _envelope.data.max(),
+        distance=int(0.03 / _step),
+    )
+    # Drop the lone opener and anchor a 50 ms grid on the first train charge.
+    _train = _time[_picks][1:]
+    _t0 = _train[0]
+    _slots = int(round((_train[-1] - _t0) / 0.05)) + 1
+    _grid = _t0 + 0.05 * np.arange(_slots)
+    _occupied = np.array([np.abs(_train - _g).min() < 0.015 for _g in _grid])
+
+    _fig, (_ax1, _ax2) = plt.subplots(2, 1, figsize=(10, 7))
+
+    # Time domain: the 50 ms grid, its empty slots, and the strong/weak
+    # alternation that makes the true repeat unit 100 ms.
+    _ax1.plot(_time, _envelope.data, color="tab:blue", lw=1)
+    for _g, _occ in zip(_grid, _occupied):
+        _ax1.axvline(
+            _g,
+            color="0.75" if _occ else "crimson",
+            ls=":" if _occ else "--",
+            lw=1 if _occ else 1.5,
+            zorder=0,
+        )
+    _ax1.plot(_train, _envelope.data[_picks][1:], "rv", label="picked charges")
+    _ymax = _envelope.data.max()
+    _ax1.annotate(
+        "",
+        xy=(_t0 + 0.05, _ymax * 0.9),
+        xytext=(_t0, _ymax * 0.9),
+        arrowprops=dict(arrowstyle="<->", color="k"),
+    )
+    _ax1.text(_t0 + 0.025, _ymax * 0.94, "50 ms", ha="center")
+    _ax1.annotate(
+        "",
+        xy=(_t0 + 0.3, _ymax * 0.72),
+        xytext=(_t0 + 0.2, _ymax * 0.72),
+        arrowprops=dict(arrowstyle="<->", color="darkgreen"),
+    )
+    _ax1.text(
+        _t0 + 0.25,
+        _ymax * 0.76,
+        "100 ms between strong charges",
+        color="darkgreen",
+        ha="center",
+        bbox=dict(fc="white", ec="none", pad=1),
+    )
+    for _g in _grid[~_occupied]:
+        _ax1.text(
+            _g,
+            _ymax * 0.55,
+            "gap",
+            color="crimson",
+            ha="center",
+            bbox=dict(fc="white", ec="none", pad=1),
+        )
+    _ax1.set_xlim(_t0 - 0.08, _train[-1] + 0.08)
+    _ax1.set_xlabel("seconds from window start")
+    _ax1.set_ylabel("mean envelope")
+    _ax1.set_title(
+        "time domain: charges on a 50 ms grid, but not every slot fires alike"
+    )
+    _ax1.legend(loc="upper right")
+
+    # Frequency domain: the same spectrum as above, with both families and
+    # both spacings labeled.
+    _comb = n180_spectrum.select(ft_time=(95, 305))
+    _freq = _comb.get_array("ft_time")
+    _amp = _comb.data
+    _freq_step = dc.to_float(_comb.get_coord("ft_time").step)
+    _teeth, _ = find_peaks(
+        _amp, height=_amp.max() / 3, distance=int(5 / _freq_step)
+    )
+    _pf, _pa = _freq[_teeth], _amp[_teeth]
+    _on_grid = np.abs(_pf - np.round(_pf / 20) * 20) <= 3
+
+    _ax2.plot(_freq, _amp, color="0.4", lw=0.8)
+    _ax2.plot(
+        _pf[_on_grid],
+        _pa[_on_grid],
+        "rv",
+        ms=9,
+        label="on the 20 Hz grid = 1 / 50 ms",
+    )
+    _ax2.plot(
+        _pf[~_on_grid],
+        _pa[~_on_grid],
+        "v",
+        color="orange",
+        ms=7,
+        label="interleaved teeth",
+    )
+    # Anchor the annotation arrows on the teeth nearest fixed frequencies so
+    # a changed pick count cannot shift them onto the wrong pair.
+    _a0 = _pf[np.abs(_pf - 150).argmin()]
+    _a1 = _pf[np.abs(_pf - 160).argmin()]
+    _arrow_height = _amp.max() * 0.85
+    _ax2.annotate(
+        "",
+        xy=(_a1, _arrow_height),
+        xytext=(_a0, _arrow_height),
+        arrowprops=dict(arrowstyle="<->", color="k"),
+    )
+    _ax2.text(
+        (_a0 + _a1) / 2,
+        _arrow_height * 1.04,
+        "10 Hz = 1 / 100 ms",
+        ha="center",
+    )
+    _s0 = _pf[np.abs(_pf - 200).argmin()]
+    _s1 = _pf[np.abs(_pf - 220).argmin()]
+    _ax2.annotate(
+        "",
+        xy=(_s1, _arrow_height * 0.6),
+        xytext=(_s0, _arrow_height * 0.6),
+        arrowprops=dict(arrowstyle="<->", color="k"),
+    )
+    _ax2.text(
+        (_s0 + _s1) / 2,
+        _arrow_height * 0.64,
+        "20 Hz = 1 / 50 ms",
+        ha="center",
+    )
+    _ax2.set_xlabel("frequency [Hz]")
+    _ax2.set_ylabel("mean amplitude")
+    _ax2.set_title(
+        "frequency domain: teeth every 10 Hz -- the spacing of a 100 ms repeat"
+    )
+    _ax2.legend(loc="upper right")
+    _fig.tight_layout()
+    _fig
     return
 
 
